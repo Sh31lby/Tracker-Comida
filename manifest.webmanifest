@@ -1,0 +1,17 @@
+{
+  "name": "Paso · pasos y comidas",
+  "short_name": "Paso",
+  "description": "Mis pasos, lo que como y mi actividad de la semana.",
+  "lang": "es-PE",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4f3f1",
+  "theme_color": "#f4f3f1",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

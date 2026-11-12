@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>Paso</title>
+<meta name="theme-color" content="#f4f3f1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Paso">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/favicon.png">
+<style>
+:root{
+  --bg:#f4f3f1; --card:#fff; --soft:#ebeae7; --line:#e6e4e0; --line2:#d6d3ce;
+  --ink:#141414; --text:#1b1b1b; --muted:#7c7a76; --dim:#adaaa5;
+  --dark:#1f1f1f; --dark2:#2c2c2c; --bar:#5d5d5d;
+  --h0:#ebeae7; --h1:#c3c1bd; --h2:#7a7874; --h3:#1a1a1a;
+  --pink:#f0405a; --green:#2f9e6b;
+  --r:20px;
+  --top:env(safe-area-inset-top,0px); --bot:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text)}
+body{font:15px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums;overscroll-behavior-y:none}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+.wrap{max-width:640px;margin:0 auto;padding:calc(var(--top) + 14px) 16px calc(var(--bot) + 110px)}
+header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:6px 2px 16px}
+.hello small{display:block;font-size:13px;color:var(--muted);margin-bottom:2px}
+h1{font-size:30px;line-height:1.08;margin:0;letter-spacing:-.035em;font-weight:500}
+h1 b{font-weight:750}
+.icbtn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line2);display:grid;place-items:center;color:var(--text);background:var(--card);flex:none}
+.icbtn svg{width:19px;height:19px}
+.pills{display:flex;gap:8px;margin:0 2px 14px}
+.pill{height:36px;padding:0 16px;border-radius:18px;border:1px solid var(--line2);font-size:14px;font-weight:500;background:transparent}
+.pill.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.card.soft{background:var(--soft);border-color:var(--soft)}
+.card.dark{background:var(--dark);border-color:var(--dark);color:#fff}
+.card h2{margin:0 0 12px;font-size:15px;font-weight:650;display:flex;justify-content:space-between;align-items:center;letter-spacing:-.01em}
+.card h2 span,.card h2 button{font-size:14px;font-weight:500;color:var(--muted)}
+.card h2 button{color:var(--ink);font-weight:600}
+.lbl{font-size:13px;color:var(--muted)}
+.dark .lbl{color:#bdbdbd}
+/* hero de pasos */
+.hero{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:150px}
+.hero .big{font-size:50px;font-weight:700;letter-spacing:-.045em;line-height:1;margin:6px 0 8px}
+.hero .sub{font-size:13px;color:var(--muted)}
+.hero .sub.ok{color:var(--green);font-weight:600}
+.ring{position:relative;width:118px;height:118px;flex:none}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:20px;font-weight:700;letter-spacing:-.02em}
+/* tarjeta oscura */
+.avg{display:flex;justify-content:space-between;align-items:flex-start}
+.avg .v{font-size:30px;font-weight:700;letter-spacing:-.03em;margin-top:2px}
+.delta{height:28px;padding:0 10px;border-radius:14px;border:1px solid #4a4a4a;font-size:13px;display:inline-flex;align-items:center;gap:3px;color:#e9e9e9}
+.bars{display:flex;align-items:flex-end;gap:7px;height:130px;margin-top:14px;position:relative}
+.bars .b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px;min-width:0}
+.bars .b i{display:block;width:100%;max-width:30px;border-radius:7px;background:var(--bar);min-height:4px}
+.bars .b.now i{background:#fff}
+.bars .b.empty i{background:#363636}
+.bars .b em{font-style:normal;font-size:10px;color:#8d8d8d;height:12px;line-height:12px}
+.bars .b.now em{color:#fff;font-weight:600}
+.bars.thin{gap:2px}.bars.thin .b i{border-radius:3px}
+.goal-line{position:absolute;left:0;right:0;border-top:1px dashed rgba(255,255,255,.35);pointer-events:none}
+.goal-line span{position:absolute;right:0;top:-16px;font-size:10px;color:#9a9a9a}
+/* barras en tarjeta clara */
+.light .bars .b i{background:#cfcdc9}.light .bars .b.ok i{background:var(--ink)}.light .bars .b.now i{outline:2px solid var(--ink);outline-offset:1px}
+.light .bars .b.empty i{background:var(--h0)}.light .bars .b em{color:var(--muted)}.light .bars .b.now em{color:var(--ink)}
+.light .goal-line{border-color:rgba(0,0,0,.25)}.light .goal-line span{color:var(--muted)}
+/* comidas */
+.meal{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line);width:100%;text-align:left}
+.meal:first-child{border-top:0;padding-top:2px}
+.dot{width:38px;height:38px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:17px}
+.meal .t{flex:1;min-width:0}
+.meal .t b{display:block;font-size:15px;font-weight:650}
+.meal .t span{display:block;font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meal .h{font-size:13px;color:var(--muted)}
+.meal.add .dot{border:1.5px dashed var(--line2);color:var(--muted);font-size:20px}
+.meal.add .t b{font-weight:500;color:var(--muted)}
+/* objetivos */
+.goals{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.goals .v{font-size:24px;font-weight:700;letter-spacing:-.02em;margin:4px 0 8px}
+.goals .v small{font-size:.62em;font-weight:500;color:var(--muted)}
+.wk{display:flex;gap:4px}
+.wk i{flex:1;height:8px;border-radius:4px;background:var(--h0)}
+.wk i.ok{background:var(--ink)}.wk i.part{background:var(--h1)}.wk i.fut{background:transparent;border:1px dashed var(--line2)}
+/* mapa de calor */
+.legend{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--muted);font-weight:400}
+.legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+.heat{display:grid;grid-template-columns:repeat(10,1fr);gap:6px}
+.heat i,.cal .d{aspect-ratio:1;border-radius:9px;display:block}
+.l0{background:var(--h0)}.l1{background:var(--h1)}.l2{background:var(--h2)}.l3{background:var(--h3)}
+.fut{background:transparent;border:1.5px dashed var(--line2)}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.cal .wd{font-size:11px;color:var(--muted);text-align:center;padding-bottom:2px}
+.cal .d{position:relative;font-size:12px;font-weight:600;display:flex;align-items:flex-start;justify-content:flex-start;padding:5px 6px;color:var(--ink)}
+.cal .d.l2,.cal .d.l3{color:#fff}
+.cal .d.today{box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px var(--pink)}
+.cal .d.fut{color:var(--dim)}
+.cal .d u{position:absolute;right:5px;bottom:5px;display:flex;gap:2px;text-decoration:none}
+.cal .d u s{width:4px;height:4px;border-radius:50%;background:currentColor;opacity:.75}
+/* listas */
+.row{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--line);width:100%;text-align:left}
+.row:first-child{border-top:0;padding-top:2px}
+.row .t{flex:1;min-width:0;font-size:14px}
+.row .t small{display:block;color:var(--muted);font-size:12px;text-transform:none}
+.row .n{font-weight:650;font-size:15px}
+.row .n.none{color:var(--dim);font-weight:500}
+.mini{width:70px;height:6px;border-radius:3px;background:var(--h0);overflow:hidden;flex:none}
+.mini i{display:block;height:100%;background:var(--ink);border-radius:3px}
+.slots{display:flex;gap:4px}
+.slots i{width:9px;height:9px;border-radius:50%;background:var(--h0)}
+.slots i.ok{background:var(--ink)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.stats div{background:var(--soft);border-radius:14px;padding:10px}
+.stats b{display:block;font-size:17px;letter-spacing:-.02em}
+.stats span{font-size:11px;color:var(--muted)}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 2px 14px}
+.nav button{width:36px;height:36px;border-radius:50%;border:1px solid var(--line2);display:grid;place-items:center;color:var(--text);background:var(--card)}
+.nav button:disabled{opacity:.3}
+.nav span{font-size:15px;font-weight:600;text-align:center;flex:1}
+.empty{color:var(--muted);font-size:14px;text-align:center;padding:14px 0}
+/* nav inferior */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(244,243,241,.9);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--line);padding:6px 8px calc(var(--bot) + 6px)}
+nav.tabs .in{max-width:640px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+nav.tabs button{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--dim);padding:6px 0;font-weight:500}
+nav.tabs button.on{color:var(--ink)}
+nav.tabs svg{width:22px;height:22px}
+.fab{position:fixed;z-index:21;right:max(18px,calc(50% - 302px));bottom:calc(var(--bot) + 78px);width:58px;height:58px;border-radius:50%;background:var(--pink);color:#fff;display:grid;place-items:center;box-shadow:0 10px 26px rgba(240,64,90,.38)}
+.fab svg{width:26px;height:26px}
+/* hoja inferior */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:40;opacity:0;pointer-events:none;transition:opacity .2s}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;background:var(--card);border-radius:24px 24px 0 0;max-height:92vh;overflow:auto;transform:translateY(100%);visibility:hidden;transition:transform .25s ease,visibility .25s;padding:10px 18px calc(var(--bot) + 20px);box-shadow:0 -10px 40px rgba(0,0,0,.12)}
+.sheet.on{transform:none;visibility:visible}
+.sheet .in{max-width:600px;margin:0 auto}
+.grab{width:40px;height:5px;border-radius:3px;background:var(--line2);margin:0 auto 12px}
+.sheet h3{margin:0 0 14px;font-size:19px;display:flex;justify-content:space-between;align-items:center;letter-spacing:-.02em}
+.sheet h3 button{color:var(--muted);font-size:15px;font-weight:500}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px;background:var(--soft);padding:4px;border-radius:14px}
+.seg button{height:38px;border-radius:11px;color:var(--muted);font-weight:600}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.amount{width:100%;background:none;border:0;outline:0;font-size:46px;font-weight:700;letter-spacing:-.04em;padding:2px 0 6px;color:var(--ink)}
+.amount::placeholder{color:var(--dim)}
+.f-lbl{display:block;font-size:12px;color:var(--muted);margin:14px 0 7px}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{height:36px;padding:0 14px;border-radius:18px;border:1px solid var(--line2);font-size:14px;background:transparent;display:inline-flex;align-items:center;gap:6px}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:600}
+.chip.s{height:32px;font-size:13px;color:var(--muted)}
+.inp{width:100%;height:46px;border-radius:12px;border:1px solid var(--line2);background:#fafaf9;padding:0 13px;outline:0;color:var(--text)}
+.inp:focus{border-color:var(--ink)}
+input[type=date].inp,input[type=time].inp{-webkit-appearance:none;appearance:none}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{height:50px;border-radius:14px;border:1px solid var(--line2);font-weight:600;width:100%;background:var(--card)}
+.btn.ink{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.danger{color:#c4314b;border-color:#f0c9cf}
+.btn.sm{height:40px;width:auto;padding:0 14px;font-size:14px}
+.cta{display:grid;gap:8px;margin-top:18px}
+.hint{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.45}
+.mt{margin-top:16px}
+.setrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.setrow:first-of-type{border-top:0}
+.setrow label{flex:1;font-size:14px}
+.setrow .inp{width:130px;height:40px;text-align:right}
+.slotrow{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.slotrow .inp{height:42px}
+.slotrow button{width:42px;height:42px;border-radius:12px;border:1px solid var(--line2);color:var(--muted);flex:none}
+ol.steps{margin:8px 0 0;padding-left:20px;font-size:14px;line-height:1.55}
+ol.steps li{margin-bottom:4px}
+/* aviso tipo notificación */
+.toast{position:fixed;left:50%;bottom:calc(var(--bot) + 150px);width:min(360px,calc(100% - 32px));transform:translateX(-50%) translateY(20px);background:rgba(255,255,255,.96);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line);box-shadow:0 12px 34px rgba(0,0,0,.14);padding:12px 14px;border-radius:18px;opacity:0;transition:all .25s;z-index:60;pointer-events:none;display:flex;gap:12px;align-items:center}
+.toast.on{opacity:1;transform:translateX(-50%)}
+.toast .ic{width:38px;height:38px;border-radius:10px;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:800;flex:none}
+.toast small{display:block;font-size:12px;color:var(--muted)}
+.toast b{display:block;font-size:15px}
+.toast span{display:block;font-size:14px}
+.hide{display:none!important}
+@media (min-width:760px){
+  .wrap{max-width:980px}
+  .toprow{display:grid;grid-template-columns:1.15fr 1fr 1fr;gap:12px;align-items:stretch}
+  .toprow .card{margin-bottom:12px}
+  .heat{grid-template-columns:repeat(16,1fr)}
+  nav.tabs .in{max-width:520px}
+  .fab{right:max(24px,calc(50% - 470px))}
+}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<button class="fab" id="fab" aria-label="Añadir">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+</button>
+
+<nav class="tabs"><div class="in">
+  <button data-tab="hoy" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2.5-6 4.5 12 2.5-6H21"/></svg>Hoy</button>
+  <button data-tab="actividad"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M5 20v-6M10 20V9M15 20v-9M20 20V5"/></svg>Actividad</button>
+  <button data-tab="comidas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10M17 21V3c-2.2 1.2-3.5 3.6-3.5 7v3H17"/></svg>Comidas</button>
+  <button data-tab="historial"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Historial</button>
+</div></nav>
+
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet"><div class="in"><div class="grab"></div><div id="sheetBody"></div></div></div>
+<div class="toast" id="toast"><div class="ic">P</div><div><small id="toastTime"></small><b id="toastTitle"></b><span id="toastSub"></span></div></div>
+<input type="file" id="importFile" accept="application/json,.json" class="hide">
+
+<script>
+'use strict';
+/* ================= Datos ================= */
+const KEY = 'paso.v1';
+const MONTHS = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const MONTHS_L = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const DAYS_L = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const WD = ['L','M','X','J','V','S','D'];
+const SNACK = { id:'snack', name:'Snack', color:'#ead0d6', emoji:'🍎' };
+const SLOT_STYLE = {
+  des:{ color:'radial-gradient(circle at 35% 30%,#f7e7c2,#e3c487)', emoji:'' },
+  alm:{ color:'radial-gradient(circle at 35% 30%,#e3f0dc,#b9d6aa)', emoji:'' },
+  lon:{ color:'radial-gradient(circle at 35% 30%,#f3dcc4,#d7b089)', emoji:'' },
+  cen:{ color:'radial-gradient(circle at 35% 30%,#dfe2f3,#b3b9dc)', emoji:'' }
+};
+const EXTRA_COLORS = ['#e6d3ec','#d4e8ea','#efe0c8','#dde7cf','#f0d6cf'];
+
+const pad = n => String(n).padStart(2, '0');
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parse = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+const todayISO = () => iso(new Date());
+const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+const monday = d => addDays(d, -((d.getDay() + 6) % 7));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtN = n => (n < 0 ? '−' : '') + String(Math.round(Math.abs(n))).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+const km = steps => (steps * S.settings.strideCm / 100000).toFixed(1).replace('.', ',') + ' km';
+const nowHM = () => { const d = new Date(); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const dShort = s => { const d = parse(s); return `${d.getDate()} ${MONTHS[d.getMonth()]}`; };
+const dLong = s => { const d = parse(s); return `${DAYS_L[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`; };
+const cap = s => s ? s[0].toUpperCase() + s.slice(1) : s;
+const dayLabel = s => { const t = todayISO(); if (s === t) return 'Hoy, ' + dLong(s); if (s === iso(addDays(new Date(), -1))) return 'Ayer, ' + dLong(s); return cap(dLong(s)); };
+const $ = s => document.querySelector(s);
+
+function defaults() {
+  return {
+    version: 1, createdAt: Date.now(),
+    settings: { name: '', stepGoal: 10000, strideCm: 73 },
+    slots: [ { id:'des', name:'Desayuno' }, { id:'alm', name:'Almuerzo' }, { id:'lon', name:'Lonche' }, { id:'cen', name:'Cena' } ],
+    steps: {},   // 'AAAA-MM-DD': pasos totales del día
+    meals: []    // { id, date, slot, time, text }
+  };
+}
+let S;
+function load() {
+  try { S = JSON.parse(localStorage.getItem(KEY)); } catch (e) { S = null; }
+  if (!S || !S.settings || !Array.isArray(S.meals)) S = defaults();
+  S.steps = S.steps || {}; S.slots = S.slots && S.slots.length ? S.slots : defaults().slots;
+}
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(S)); }
+  catch (e) { toast('No se pudo guardar', e.message); }
+}
+
+/* ================= Cálculos ================= */
+const stepsOn = d => S.steps[d] || 0;
+const goal = () => S.settings.stepGoal || 10000;
+const mealsOn = d => S.meals.filter(m => m.date === d).sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+const slotById = id => S.slots.find(s => s.id === id) || (id === 'snack' ? SNACK : null);
+const slotName = id => (slotById(id) || { name: 'Otra' }).name;
+function slotStyle(id) {
+  if (SLOT_STYLE[id]) return SLOT_STYLE[id].color;
+  if (id === 'snack') return SNACK.color;
+  return EXTRA_COLORS[[...id].reduce((a, c) => a + c.charCodeAt(0), 0) % EXTRA_COLORS.length];
+}
+const filledSlots = d => { const ids = new Set(mealsOn(d).map(m => m.slot)); return S.slots.filter(s => ids.has(s.id)).length; };
+const level = n => !n ? 0 : n < goal() * .5 ? 1 : n < goal() ? 2 : 3;
+function range(a, b) { const out = []; for (let d = parse(a); iso(d) <= b; d = addDays(d, 1)) out.push(iso(d)); return out; }
+function sumAvg(days) {
+  const t = todayISO(), past = days.filter(d => d <= t);
+  const total = past.reduce((a, d) => a + stepsOn(d), 0);
+  return { total, avg: past.length ? total / past.length : 0, n: past.length };
+}
+function weekOf(d) { const m = monday(d); return { start: iso(m), end: iso(addDays(m, 6)) }; }
+function monthOf(d) { return { start: iso(new Date(d.getFullYear(), d.getMonth(), 1)), end: iso(new Date(d.getFullYear(), d.getMonth() + 1, 0)) }; }
+function suggestSlot(date) {
+  const h = new Date().getHours();
+  const ideal = date !== todayISO() ? null : h < 11 ? 'des' : h < 16 ? 'alm' : h < 19 ? 'lon' : 'cen';
+  const done = new Set(mealsOn(date).map(m => m.slot));
+  if (ideal && S.slots.some(s => s.id === ideal) && !done.has(ideal)) return ideal;
+  const free = S.slots.find(s => !done.has(s.id));
+  return free ? free.id : (ideal && S.slots.some(s => s.id === ideal) ? ideal : 'snack');
+}
+
+/* ================= Piezas ================= */
+function ring(p) {
+  const r = 42, c = 2 * Math.PI * r, v = Math.max(0, Math.min(1, p));
+  return `<div class="ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="${r}" fill="none" stroke="#d9d7d3" stroke-width="9"/>
+    <circle cx="50" cy="50" r="${r}" fill="none" stroke="var(--ink)" stroke-width="9" stroke-linecap="round" stroke-dasharray="${(c*v).toFixed(1)} ${c.toFixed(1)}" ${v === 0 ? 'opacity="0"' : ''}/></svg><b>${Math.round(p * 100)}%</b></div>`;
+}
+// days: lista de fechas; label: fn(fecha) → texto
+function bars(days, label, opts = {}) {
+  const t = todayISO();
+  const max = Math.max(goal() * 1.1, ...days.map(stepsOn));
+  const gl = 100 - (goal() / max) * 100;
+  const h = opts.h || 130, inner = h - 18;
+  return `<div class="bars ${days.length > 10 ? 'thin' : ''}" style="height:${h}px">
+    <div class="goal-line" style="top:${(gl * inner / 100).toFixed(1)}px"><span>${fmtN(goal())}</span></div>
+    ${days.map(d => {
+      const v = stepsOn(d), fut = d > t;
+      const cls = [d === t ? 'now' : '', !v ? 'empty' : '', v >= goal() ? 'ok' : ''].join(' ');
+      return `<div class="b ${cls}" ${opts.tap ? `data-act="day" data-d="${d}"` : ''}><i style="height:${fut ? 0 : Math.max(3, v / max * inner).toFixed(1)}px;${fut ? 'background:transparent' : ''}"></i><em>${label(d)}</em></div>`;
+    }).join('')}</div>`;
+}
+function mealList(date) {
+  const ms = mealsOn(date);
+  const rows = [];
+  const order = [...S.slots.map(s => s.id), 'snack'];
+  const used = new Set();
+  order.forEach(id => {
+    const these = ms.filter(m => m.slot === id);
+    these.forEach(m => { used.add(m.id); rows.push(mealRow(m)); });
+    if (!these.length && id !== 'snack') rows.push(`<button class="meal add" data-act="addmeal" data-d="${date}" data-slot="${id}"><span class="dot">+</span><span class="t"><b>Añadir ${esc(slotName(id).toLowerCase())}</b></span></button>`);
+  });
+  ms.filter(m => !used.has(m.id)).forEach(m => rows.push(mealRow(m)));
+  return rows.join('');
+}
+function mealRow(m) {
+  return `<button class="meal" data-act="editmeal" data-id="${m.id}"><span class="dot" style="background:${slotStyle(m.slot)}"></span>
+    <span class="t"><b>${esc(slotName(m.slot))}</b><span>${esc(m.text) || '—'}</span></span><span class="h">${esc(m.time || '')}</span></button>`;
+}
+function heatCells(start, end, cal) {
+  const t = todayISO();
+  return range(start, end).map(d => {
+    const fut = d > t, n = stepsOn(d), f = filledSlots(d);
+    const cls = fut ? 'fut' : 'l' + level(n);
+    if (!cal) return `<i class="${cls}" data-act="day" data-d="${d}" title="${dShort(d)} · ${fmtN(n)} pasos"></i>`;
+    const dots = !fut && f ? `<u>${'<s></s>'.repeat(Math.min(f, 5))}</u>` : '';
+    return `<button class="d ${cls} ${d === t ? 'today' : ''}" data-act="day" data-d="${d}">${parse(d).getDate()}${dots}</button>`;
+  }).join('');
+}
+const legend = `<span class="legend">Menos <i class="l0"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i> Más</span>`;
+const gear = `<button class="icbtn" data-tab="ajustes" aria-label="Ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>`;
+const chev = dir => `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="${dir < 0 ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7'}"/></svg>`;
+function deltaPill(cur, prev) {
+  if (!prev || !cur) return '';
+  const p = Math.round((cur - prev) / prev * 100);
+  return `<span class="delta">${p >= 0 ? '↑' : '↓'} ${Math.abs(p)} %</span>`;
+}
+
+/* ================= Pantallas ================= */
+let tab = 'hoy', period = 'hoy', actMode = 'semana', actOff = 0, mealDay = todayISO(), histOff = 0;
+
+function viewHoy() {
+  const now = new Date(), t = todayISO(), g = goal(), name = S.settings.name.trim();
+  let hero, avgCard;
+  if (period === 'hoy') {
+    const n = stepsOn(t), left = g - n;
+    hero = `<div><div class="lbl">Pasos hoy</div><div class="big">${fmtN(n)}</div>
+      <div class="sub ${left <= 0 ? 'ok' : ''}">${left > 0 ? `Te faltan ${fmtN(left)} · ${km(n)}` : `¡Objetivo cumplido! · ${km(n)}`}</div></div>${ring(n / g)}`;
+    const last = range(iso(addDays(now, -6)), t), prev = range(iso(addDays(now, -13)), iso(addDays(now, -7)));
+    const a = sumAvg(last).avg, b = sumAvg(prev).avg;
+    avgCard = { title: 'Media semanal', v: a, delta: deltaPill(a, b), chart: bars(last, d => WD[(parse(d).getDay() + 6) % 7], { tap: true }) };
+  } else if (period === 'semana') {
+    const w = weekOf(now), days = range(w.start, w.end), s = sumAvg(days);
+    const pw = weekOf(addDays(now, -7)), ps = sumAvg(range(pw.start, pw.end));
+    hero = `<div><div class="lbl">Pasos esta semana</div><div class="big">${fmtN(s.total)}</div>
+      <div class="sub">Media ${fmtN(s.avg)}/día · ${km(s.total)}</div></div>${ring(s.total / (g * 7))}`;
+    avgCard = { title: 'Media diaria', v: s.avg, delta: deltaPill(s.avg, ps.avg), chart: bars(days, d => WD[(parse(d).getDay() + 6) % 7], { tap: true }) };
+  } else {
+    const m = monthOf(now), days = range(m.start, m.end), s = sumAvg(days);
+    const pm = monthOf(new Date(now.getFullYear(), now.getMonth() - 1, 1)), ps = sumAvg(range(pm.start, pm.end));
+    hero = `<div><div class="lbl">Pasos en ${MONTHS_L[now.getMonth()]}</div><div class="big">${fmtN(s.total)}</div>
+      <div class="sub">Media ${fmtN(s.avg)}/día · ${km(s.total)}</div></div>${ring(s.total / (g * days.length))}`;
+    avgCard = { title: 'Media mensual', v: s.avg, delta: deltaPill(s.avg, ps.avg), chart: bars(days, d => { const n = parse(d).getDate(); return n === 1 || n % 5 === 0 ? n : ''; }, { tap: true }) };
+  }
+  // Objetivos de la semana (lunes → hoy)
+  const w = weekOf(now), wdays = range(w.start, w.end);
+  const past = wdays.filter(d => d <= t);
+  const stepOk = past.filter(d => stepsOn(d) >= g).length;
+  const mealOk = past.filter(d => filledSlots(d) >= S.slots.length).length;
+  const wkBar = fn => `<div class="wk">${wdays.map(d => d > t ? '<i class="fut"></i>' : `<i class="${fn(d)}"></i>`).join('')}</div>`;
+  const m = monthOf(now);
+  return `
+  <header class="top"><div class="hello"><small>Mira cómo va tu día</small><h1>¡Hola${name ? `, <b>${esc(name)}</b>` : ''}!</h1></div>${gear}</header>
+  <div class="pills">${['hoy','semana','mes'].map(p => `<button class="pill ${period === p ? 'on' : ''}" data-act="period" data-p="${p}">${p[0].toUpperCase() + p.slice(1)}</button>`).join('')}</div>
+  <div class="toprow">
+    <div class="card soft hero" data-act="steps" data-d="${t}">${hero}</div>
+    <div class="card dark"><div class="avg"><div><div class="lbl">${avgCard.title}</div><div class="v">${fmtN(avgCard.v)}</div></div>${avgCard.delta}</div>${avgCard.chart}</div>
+    <div class="card"><h2>Comidas <span>${filledSlots(t)} / ${S.slots.length}</span></h2>${mealList(t)}</div>
+  </div>
+  <div class="card"><h2>Objetivo cumplido <span>esta semana</span></h2>
+    <div class="goals">
+      <div><div class="lbl">${fmtN(g)} pasos</div><div class="v">${stepOk} <small>de ${past.length} días</small></div>${wkBar(d => stepsOn(d) >= g ? 'ok' : stepsOn(d) ? 'part' : '')}</div>
+      <div><div class="lbl">${S.slots.length} comidas</div><div class="v">${mealOk} <small>de ${past.length} días</small></div>${wkBar(d => filledSlots(d) >= S.slots.length ? 'ok' : filledSlots(d) ? 'part' : '')}</div>
+    </div></div>
+  <div class="card"><h2>Historial · ${MONTHS_L[now.getMonth()]} ${legend}</h2><div class="heat">${heatCells(m.start, m.end)}</div></div>`;
+}
+
+function viewActividad() {
+  const now = new Date(), t = todayISO(), g = goal();
+  let p, label, lab;
+  if (actMode === 'semana') {
+    p = weekOf(addDays(now, actOff * 7));
+    const a = parse(p.start), b = parse(p.end);
+    label = a.getMonth() === b.getMonth() ? `${a.getDate()} – ${b.getDate()} ${MONTHS[b.getMonth()]}` : `${dShort(p.start)} – ${dShort(p.end)}`;
+    if (actOff === 0) label = 'Esta semana'; else if (actOff === -1) label = 'Semana pasada · ' + label;
+    lab = d => WD[(parse(d).getDay() + 6) % 7];
+  } else {
+    const base = new Date(now.getFullYear(), now.getMonth() + actOff, 1);
+    p = monthOf(base); label = `${cap(MONTHS_L[base.getMonth()])} ${base.getFullYear()}`;
+    lab = d => { const n = parse(d).getDate(); return n === 1 || n % 5 === 0 ? n : ''; };
+  }
+  const days = range(p.start, p.end), s = sumAvg(days);
+  const past = days.filter(d => d <= t);
+  const best = past.reduce((a, d) => stepsOn(d) > stepsOn(a) ? d : a, past[0] || p.start);
+  const ok = past.filter(d => stepsOn(d) >= g).length;
+  const list = past.slice().reverse().map(d => {
+    const n = stepsOn(d);
+    return `<button class="row" data-act="steps" data-d="${d}"><span class="t">${d === t ? 'Hoy' : esc(cap(dLong(d)))}<small>${n ? km(n) : 'Sin registrar'}</small></span>
+      <span class="mini"><i style="width:${Math.min(100, n / g * 100)}%"></i></span><span class="n ${n ? '' : 'none'}">${n ? fmtN(n) : '—'}</span></button>`;
+  }).join('');
+  return `
+  <header class="top"><div class="hello"><small>Tus pasos</small><h1><b>Actividad</b></h1></div>${gear}</header>
+  <div class="pills">${['semana','mes'].map(m => `<button class="pill ${actMode === m ? 'on' : ''}" data-act="actmode" data-m="${m}">${m[0].toUpperCase() + m.slice(1)}</button>`).join('')}</div>
+  <div class="nav"><button data-act="actnav" data-v="-1" aria-label="Anterior">${chev(-1)}</button><span>${esc(label)}</span><button data-act="actnav" data-v="1" ${actOff >= 0 ? 'disabled' : ''} aria-label="Siguiente">${chev(1)}</button></div>
+  <div class="card light">
+    <div class="lbl">Pasos en total</div><div style="font-size:38px;font-weight:700;letter-spacing:-.04em;margin:4px 0 2px">${fmtN(s.total)}</div>
+    <div class="lbl">${km(s.total)}</div>
+    ${bars(days, lab, { tap: true, h: 150 })}
+    <div class="stats"><div><b>${fmtN(s.avg)}</b><span>Media / día</span></div><div><b>${stepsOn(best) ? fmtN(stepsOn(best)) : '—'}</b><span>${stepsOn(best) ? 'Mejor: ' + dShort(best) : 'Mejor día'}</span></div><div><b>${ok} / ${past.length}</b><span>Días cumplidos</span></div></div>
+  </div>
+  <div class="card"><h2>Días <button data-act="steps" data-d="${past.length ? past[past.length - 1] : t}">+ Registrar</button></h2>${list || '<div class="empty">Este periodo aún no empieza.</div>'}</div>`;
+}
+
+function viewComidas() {
+  const t = todayISO();
+  const last7 = range(iso(addDays(new Date(), -6)), t).reverse();
+  const rows = last7.map(d => {
+    const ids = new Set(mealsOn(d).map(m => m.slot));
+    return `<button class="row" data-act="mealday" data-d="${d}"><span class="t">${d === t ? 'Hoy' : esc(cap(dLong(d)))}<small>${mealsOn(d).length} registradas</small></span>
+      <span class="slots">${S.slots.map(s => `<i class="${ids.has(s.id) ? 'ok' : ''}" title="${esc(s.name)}"></i>`).join('')}</span><span class="n" style="min-width:34px;text-align:right">${filledSlots(d)}/${S.slots.length}</span></button>`;
+  }).join('');
+  // Lo que más repites (para acordarte)
+  const freq = {};
+  S.meals.forEach(m => { const k = (m.text || '').trim().toLowerCase(); if (k) freq[k] = (freq[k] || 0) + 1; });
+  const top = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  return `
+  <header class="top"><div class="hello"><small>Lo que comes</small><h1><b>Comidas</b></h1></div>${gear}</header>
+  <div class="nav"><button data-act="mealnav" data-v="-1" aria-label="Día anterior">${chev(-1)}</button><span>${esc(dayLabel(mealDay))}</span><button data-act="mealnav" data-v="1" ${mealDay >= t ? 'disabled' : ''} aria-label="Día siguiente">${chev(1)}</button></div>
+  <div class="card"><h2>${mealDay === t ? 'Hoy' : 'Ese día'} <span>${filledSlots(mealDay)} / ${S.slots.length}</span></h2>${mealList(mealDay)}
+    <div class="mt"><button class="btn sm" data-act="addmeal" data-d="${mealDay}" data-slot="snack">+ Añadir snack</button></div></div>
+  <div class="card"><h2>Últimos 7 días</h2>${rows}</div>
+  ${top.length ? `<div class="card"><h2>Lo que más comes</h2>${top.map(([k, n]) => `<div class="row"><span class="t" style="text-transform:none">${esc(k[0].toUpperCase() + k.slice(1))}</span><span class="n">${n}×</span></div>`).join('')}</div>` : ''}`;
+}
+
+function viewHistorial() {
+  const now = new Date(), base = new Date(now.getFullYear(), now.getMonth() + histOff, 1);
+  const m = monthOf(base), t = todayISO(), g = goal();
+  const lead = (base.getDay() + 6) % 7;
+  const days = range(m.start, m.end), past = days.filter(d => d <= t), s = sumAvg(days);
+  const ok = past.filter(d => stepsOn(d) >= g).length;
+  const okM = past.filter(d => filledSlots(d) >= S.slots.length).length;
+  const nMeals = S.meals.filter(x => x.date >= m.start && x.date <= m.end).length;
+  return `
+  <header class="top"><div class="hello"><small>Mes a mes</small><h1><b>Historial</b></h1></div>${gear}</header>
+  <div class="nav"><button data-act="histnav" data-v="-1" aria-label="Mes anterior">${chev(-1)}</button><span>${cap(MONTHS_L[base.getMonth()])} ${base.getFullYear()}</span><button data-act="histnav" data-v="1" ${histOff >= 0 ? 'disabled' : ''} aria-label="Mes siguiente">${chev(1)}</button></div>
+  <div class="card"><h2>Pasos por día ${legend}</h2>
+    <div class="cal">${WD.map(w => `<div class="wd">${w}</div>`).join('')}${'<div></div>'.repeat(lead)}${heatCells(m.start, m.end, true)}</div>
+    <div class="hint">Los puntitos son las comidas registradas. Toca un día para verlo o editarlo.</div></div>
+  <div class="card"><h2>Resumen</h2>
+    <div class="stats" style="margin-top:0"><div><b>${ok} / ${past.length}</b><span>Días con ${fmtN(g)} pasos</span></div><div><b>${okM} / ${past.length}</b><span>Días con ${S.slots.length} comidas</span></div><div><b>${fmtN(s.avg)}</b><span>Media de pasos</span></div></div>
+    <div class="stats"><div><b>${fmtN(s.total)}</b><span>Pasos en total</span></div><div><b>${km(s.total).replace(' km', '')}</b><span>Kilómetros</span></div><div><b>${nMeals}</b><span>Comidas registradas</span></div></div>
+  </div>`;
+}
+
+function viewAjustes() {
+  const st = S.settings;
+  return `
+  <header class="top"><div class="hello"><small>Tu app</small><h1><b>Ajustes</b></h1></div><button class="icbtn" data-tab="hoy" aria-label="Cerrar">${chev(-1)}</button></header>
+  <div class="card"><h2>Objetivos</h2>
+    <div class="setrow"><label for="s-name">Tu nombre</label><input class="inp" id="s-name" value="${esc(st.name)}" placeholder="Opcional" style="text-align:right"></div>
+    <div class="setrow"><label for="s-goal">Meta de pasos al día</label><input class="inp" id="s-goal" inputmode="numeric" value="${st.stepGoal}"></div>
+    <div class="setrow"><label for="s-stride">Largo de tu paso (cm)<div class="hint" style="margin:2px 0 0">Para calcular los km. Unos 73 cm es lo normal.</div></label><input class="inp" id="s-stride" inputmode="numeric" value="${st.strideCm}"></div>
+    <div class="cta"><button class="btn ink" data-act="savesettings">Guardar</button></div></div>
+  <div class="card"><h2>Comidas del día <span>meta: ${S.slots.length}</span></h2>
+    ${S.slots.map((s, i) => `<div class="slotrow"><input class="inp" id="slot-${i}" value="${esc(s.name)}"><button data-act="delslot" data-i="${i}" aria-label="Quitar">✕</button></div>`).join('')}
+    <div class="slotrow"><input class="inp" id="newslot" placeholder="Añadir otra (p. ej. Media mañana)"><button data-act="addslot" aria-label="Añadir" style="color:var(--ink)">+</button></div>
+    <div class="cta"><button class="btn" data-act="saveslots">Guardar nombres</button></div>
+    <div class="hint">La meta de comidas es cuántas tienes en esta lista. El “Snack” va aparte y no cuenta para la meta.</div></div>
+  <div class="card"><h2>Pasos desde la app Salud</h2>
+    <div class="hint" style="margin-top:0">Una web no puede leer Salud directamente, así que se hace con un Atajo que copia tus pasos de hoy. Créalo una vez en la app <b>Atajos</b>:</div>
+    <ol class="steps"><li>Nuevo atajo → <b>Buscar muestras de salud</b>: tipo <i>Pasos</i>, fecha de inicio <i>es hoy</i>.</li>
+      <li>Añade <b>Calcular estadísticas</b>: <i>Suma</i> de las muestras.</li>
+      <li>Añade <b>Redondear número</b> y luego <b>Copiar al portapapeles</b>.</li>
+      <li>Llámalo “Mis pasos”. Úsalo, abre Paso, toca <b>+ → Pasos → Pegar</b>.</li></ol>
+    <div class="hint">También puedes escribir el número a mano mirando Salud.</div></div>
+  <div class="card"><h2>Copia de seguridad</h2>
+    <div class="hint" style="margin-top:0">Tus datos se guardan solo en este iPhone. Exporta una copia de vez en cuando (por ejemplo a iCloud Drive).</div>
+    <div class="cta"><button class="btn ink" data-act="export">Exportar copia</button><button class="btn" data-act="import">Importar copia</button><button class="btn" data-act="csv">Exportar a Excel (CSV)</button></div></div>
+  <div class="card"><div class="cta" style="margin-top:0"><button class="btn danger" data-act="reset">Borrar todos los datos</button></div></div>`;
+}
+
+function render() {
+  const v = { hoy: viewHoy, actividad: viewActividad, comidas: viewComidas, historial: viewHistorial, ajustes: viewAjustes }[tab];
+  $('#app').innerHTML = v();
+  document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+}
+
+/* ================= Hojas ================= */
+let sheetCtx = null;
+function openSheet(html, ctx) { sheetCtx = ctx; $('#sheetBody').innerHTML = html; $('#scrim').classList.add('on'); $('#sheet').classList.add('on'); }
+function closeSheet() { sheetCtx = null; $('#scrim').classList.remove('on'); $('#sheet').classList.remove('on'); document.activeElement && document.activeElement.blur(); }
+
+function mealForm(m, isNew) {
+  sheetCtx = { kind: 'meal', m, isNew };
+  drawMealForm();
+}
+function drawMealForm(keepFocus) {
+  const { m, isNew } = sheetCtx;
+  const opts = [...S.slots, SNACK];
+  if (!opts.some(s => s.id === m.slot)) opts.push({ id: m.slot, name: slotName(m.slot) });
+  // Sugerencias: lo último que comiste en esa comida
+  const seen = new Set(), sugg = [];
+  S.meals.slice().sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time)).forEach(x => {
+    const k = (x.text || '').trim(); if (x.slot === m.slot && k && !seen.has(k.toLowerCase()) && sugg.length < 6) { seen.add(k.toLowerCase()); sugg.push(k); }
+  });
+  const html = `
+    ${isNew ? `<div class="seg"><button class="on">Comida</button><button data-act="toSteps">Pasos</button></div>` : ''}
+    <h3>${isNew ? 'Añadir comida' : 'Editar comida'}<button data-act="close">Cerrar</button></h3>
+    <div class="chips">${opts.map(s => `<button class="chip ${s.id === m.slot ? 'on' : ''}" data-act="pickslot" data-id="${s.id}">${esc(s.name)}</button>`).join('')}</div>
+    <label class="f-lbl" for="m-text">¿Qué comiste?</label>
+    <input class="inp" id="m-text" value="${esc(m.text)}" placeholder="Ej. Avena, yogur y fruta" autocomplete="off">
+    ${sugg.length ? `<div class="chips" style="margin-top:8px">${sugg.map(s => `<button class="chip s" data-act="sugg" data-v="${esc(s)}">${esc(s)}</button>`).join('')}</div>` : ''}
+    <div class="f2"><div><label class="f-lbl" for="m-time">Hora</label><input class="inp" id="m-time" type="time" value="${esc(m.time)}"></div>
+      <div><label class="f-lbl" for="m-date">Día</label><input class="inp" id="m-date" type="date" value="${m.date}" max="${todayISO()}"></div></div>
+    <div class="cta"><button class="btn ink" data-act="savemeal">Guardar</button>${isNew ? '' : '<button class="btn danger" data-act="delmeal">Eliminar</button>'}</div>`;
+  const prev = sheetCtx;
+  openSheet(html, prev);
+  if (keepFocus) { const i = $('#m-text'); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }
+}
+function readMealForm() { const m = sheetCtx.m; m.text = $('#m-text').value.trim(); m.time = $('#m-time').value; m.date = $('#m-date').value || m.date; }
+
+function stepsForm(date, fromNew) {
+  sheetCtx = { kind: 'steps', date, fromNew };
+  const cur = S.steps[date];
+  openSheet(`
+    ${fromNew ? `<div class="seg"><button data-act="toMeal">Comida</button><button class="on">Pasos</button></div>` : ''}
+    <h3>Pasos · ${esc(date === todayISO() ? 'hoy' : dShort(date))}<button data-act="close">Cerrar</button></h3>
+    <input class="amount" id="st-n" inputmode="numeric" placeholder="0" value="${cur ? fmtN(cur) : ''}" autocomplete="off">
+    <div class="hint" style="margin-top:0">Escribe el <b>total del día</b> (el número que ves en Salud), no lo que sumaste.</div>
+    <div class="chips mt"><button class="chip" data-act="paste">📋 Pegar</button><button class="chip" data-act="addst" data-v="1000">+1.000</button><button class="chip" data-act="addst" data-v="500">+500</button></div>
+    <label class="f-lbl" for="st-date">Día</label><input class="inp" id="st-date" type="date" value="${date}" max="${todayISO()}">
+    <div class="cta"><button class="btn ink" data-act="savesteps">Guardar</button>${cur != null ? '<button class="btn danger" data-act="delsteps">Borrar pasos de este día</button>' : ''}</div>`, sheetCtx);
+}
+const readSteps = () => parseInt(($('#st-n').value || '').replace(/\D/g, ''), 10);
+
+function dayForm(d) {
+  sheetCtx = { kind: 'day', date: d };
+  const n = stepsOn(d), fut = d > todayISO();
+  openSheet(`
+    <h3><span>${esc(dayLabel(d))}</span><button data-act="close">Cerrar</button></h3>
+    <div class="card soft hero" style="min-height:0" ${fut ? '' : `data-act="steps" data-d="${d}"`}><div><div class="lbl">Pasos</div><div class="big" style="font-size:40px">${fmtN(n)}</div><div class="sub">${n ? km(n) : fut ? 'Todavía no llega' : 'Toca para registrar'}</div></div>${ring(n / goal())}</div>
+    ${fut ? '' : `<div class="card" style="margin-bottom:0"><h2>Comidas <span>${filledSlots(d)} / ${S.slots.length}</span></h2>${mealList(d)}</div>`}`, sheetCtx);
+}
+
+/* ================= Aviso ================= */
+let tTimer;
+function toast(title, sub = '') {
+  $('#toastTime').textContent = 'Paso · ' + nowHM();
+  $('#toastTitle').textContent = title; $('#toastSub').textContent = sub;
+  $('#toast').classList.add('on'); clearTimeout(tTimer);
+  tTimer = setTimeout(() => $('#toast').classList.remove('on'), 2600);
+}
+function leftMsg() {
+  const left = goal() - stepsOn(todayISO());
+  return left > 0 ? `Te quedan ${fmtN(left)} pasos hoy` : '¡Ya cumpliste tus pasos de hoy!';
+}
+
+/* ================= Exportar ================= */
+function download(name, text, type) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+function exportCSV() {
+  const q = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const dates = [...new Set([...Object.keys(S.steps), ...S.meals.map(m => m.date)])].sort();
+  const lines = [['Fecha', 'Tipo', 'Comida', 'Hora', 'Detalle', 'Pasos'].join(';')];
+  dates.forEach(d => {
+    if (S.steps[d] != null) lines.push([d, 'Pasos', '', '', '', S.steps[d]].map(q).join(';'));
+    mealsOn(d).forEach(m => lines.push([d, 'Comida', slotName(m.slot), m.time, m.text, ''].map(q).join(';')));
+  });
+  download(`paso-${todayISO()}.csv`, '﻿' + lines.join('\n'), 'text/csv');
+}
+
+/* ================= Acciones ================= */
+const actions = {
+  close: closeSheet,
+  period(el) { period = el.dataset.p; render(); },
+  actmode(el) { actMode = el.dataset.m; actOff = 0; render(); },
+  actnav(el) { actOff = Math.min(0, actOff + +el.dataset.v); render(); },
+  mealnav(el) { const d = iso(addDays(parse(mealDay), +el.dataset.v)); if (d <= todayISO()) { mealDay = d; render(); } },
+  mealday(el) { mealDay = el.dataset.d; render(); window.scrollTo(0, 0); },
+  histnav(el) { histOff = Math.min(0, histOff + +el.dataset.v); render(); },
+  day(el) { dayForm(el.dataset.d); },
+  steps(el) { stepsForm(el.dataset.d || todayISO(), false); },
+  addmeal(el) { const d = el.dataset.d || todayISO(); mealForm({ id: uid(), date: d, slot: el.dataset.slot || suggestSlot(d), time: d === todayISO() ? nowHM() : '', text: '' }, true); },
+  editmeal(el) { const m = S.meals.find(x => x.id === el.dataset.id); if (m) mealForm({ ...m }, false); },
+  pickslot(el) { readMealForm(); sheetCtx.m.slot = el.dataset.id; drawMealForm(); },
+  sugg(el) { $('#m-text').value = el.dataset.v; },
+  toSteps() { stepsForm(sheetCtx && sheetCtx.m ? sheetCtx.m.date : todayISO(), true); },
+  toMeal() { const d = sheetCtx ? sheetCtx.date : todayISO(); mealForm({ id: uid(), date: d, slot: suggestSlot(d), time: d === todayISO() ? nowHM() : '', text: '' }, true); },
+  savemeal() {
+    readMealForm(); const m = sheetCtx.m, isNew = sheetCtx.isNew;
+    if (!m.text) { $('#m-text').focus(); toast('Escribe qué comiste'); return; }
+    const i = S.meals.findIndex(x => x.id === m.id);
+    if (i >= 0) S.meals[i] = m; else S.meals.push(m);
+    save(); closeSheet(); render();
+    toast(`${slotName(m.slot)} ${isNew ? 'guardad' : 'actualizad'}${/a$/i.test(slotName(m.slot)) ? 'a' : 'o'}`, m.date === todayISO() ? leftMsg() : dLong(m.date));
+  },
+  delmeal() {
+    if (!confirm('¿Eliminar esta comida?')) return;
+    S.meals = S.meals.filter(x => x.id !== sheetCtx.m.id); save(); closeSheet(); render(); toast('Comida eliminada');
+  },
+  async paste() {
+    try {
+      const txt = await navigator.clipboard.readText();
+      const n = parseInt(String(txt).replace(/[^\d]/g, ''), 10);
+      if (!(n >= 0)) throw 0;
+      $('#st-n').value = fmtN(n); toast('Pasos pegados', fmtN(n) + ' pasos');
+    } catch (e) { toast('No hay pasos copiados', 'Usa tu atajo “Mis pasos” primero'); }
+  },
+  addst(el) { const n = (readSteps() || 0) + +el.dataset.v; $('#st-n').value = fmtN(n); },
+  savesteps() {
+    const n = readSteps(), d = $('#st-date').value || sheetCtx.date;
+    if (!(n >= 0) || n > 200000) { toast('Revisa el número'); return; }
+    const before = stepsOn(d);
+    S.steps[d] = n; save(); closeSheet(); render();
+    const hit = n >= goal() && before < goal();
+    toast(hit ? '¡Objetivo de pasos cumplido! 🎉' : 'Pasos guardados', d === todayISO() ? (hit ? `${fmtN(n)} pasos · ${km(n)}` : leftMsg()) : `${fmtN(n)} pasos · ${dLong(d)}`);
+  },
+  delsteps() { delete S.steps[sheetCtx.date]; save(); closeSheet(); render(); toast('Pasos borrados'); },
+  savesettings() {
+    const g = parseInt($('#s-goal').value.replace(/\D/g, ''), 10), s = parseInt($('#s-stride').value, 10);
+    S.settings.name = $('#s-name').value.trim();
+    if (g >= 500 && g <= 100000) S.settings.stepGoal = g;
+    if (s >= 30 && s <= 150) S.settings.strideCm = s;
+    save(); render(); toast('Ajustes guardados');
+  },
+  saveslots() {
+    let changed = false;
+    S.slots.forEach((s, i) => { const v = ($('#slot-' + i).value || '').trim(); if (v && v !== s.name) { s.name = v; changed = true; } });
+    save(); render(); toast(changed ? 'Nombres guardados' : 'Sin cambios');
+  },
+  addslot() {
+    const v = $('#newslot').value.trim(); if (!v) { $('#newslot').focus(); return; }
+    if (S.slots.some(s => s.name.toLowerCase() === v.toLowerCase())) { toast('Ya existe'); return; }
+    S.slots.push({ id: 's' + uid(), name: v }); save(); render(); toast('Comida añadida', 'Tu meta ahora es ' + S.slots.length);
+  },
+  delslot(el) {
+    if (S.slots.length <= 1) { toast('Deja al menos una'); return; }
+    const s = S.slots[+el.dataset.i];
+    if (!confirm(`¿Quitar "${s.name}" de tus comidas del día? Lo que ya registraste no se borra.`)) return;
+    S.slots.splice(+el.dataset.i, 1); save(); render();
+  },
+  export() { download(`paso-copia-${todayISO()}.json`, JSON.stringify(S, null, 1), 'application/json'); },
+  csv: exportCSV,
+  import() { $('#importFile').click(); },
+  reset() {
+    if (!confirm('¿Borrar TODOS tus datos? Exporta una copia antes si la quieres guardar.')) return;
+    if (!confirm('¿Seguro? Esto no se puede deshacer.')) return;
+    localStorage.removeItem(KEY); load(); tab = 'hoy'; render(); toast('Datos borrados');
+  }
+};
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-tab]');
+  if (t) { tab = t.dataset.tab; if (tab === 'comidas') mealDay = todayISO(); actOff = 0; histOff = 0; render(); window.scrollTo(0, 0); return; }
+  const a = e.target.closest('[data-act]');
+  if (a && actions[a.dataset.act]) { e.preventDefault(); actions[a.dataset.act](a); }
+});
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' || !sheetCtx || e.target.tagName !== 'INPUT') return;
+  e.preventDefault();
+  if (sheetCtx.kind === 'meal') actions.savemeal(); else if (sheetCtx.kind === 'steps') actions.savesteps();
+});
+document.addEventListener('input', e => {
+  if (e.target.id === 'st-n') { const n = readSteps(); e.target.value = n >= 0 ? fmtN(n) : ''; }
+});
+$('#scrim').addEventListener('click', closeSheet);
+$('#fab').addEventListener('click', () => {
+  const d = tab === 'comidas' ? mealDay : todayISO();
+  if (tab === 'actividad') stepsForm(todayISO(), true);
+  else mealForm({ id: uid(), date: d, slot: suggestSlot(d), time: d === todayISO() ? nowHM() : '', text: '' }, true);
+});
+$('#importFile').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try {
+    const d = JSON.parse(await f.text());
+    if (!Array.isArray(d.meals) || !d.settings || typeof d.steps !== 'object') throw new Error('formato');
+    if (!confirm(`¿Reemplazar tus datos con esta copia (${d.meals.length} comidas, ${Object.keys(d.steps).length} días de pasos)?`)) return;
+    localStorage.setItem(KEY, JSON.stringify(d)); load(); render(); toast('Copia importada');
+  } catch (err) { toast('Ese archivo no es una copia válida'); }
+});
+// Si la app se queda abierta y cambia el día, se actualiza al volver
+let lastDay = todayISO();
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) return;
+  if (todayISO() !== lastDay) { lastDay = todayISO(); mealDay = lastDay; }
+  render();
+});
+
+load();
+render();
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
