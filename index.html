@@ -78,14 +78,14 @@ h1 b{font-weight:750}
 .dot{width:38px;height:38px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:17px}
 .meal .t{flex:1;min-width:0}
 .meal .t b{display:block;font-size:15px;font-weight:650}
-.meal .t span{display:block;font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meal .t span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:13px;color:var(--muted);overflow:hidden}
 .meal .h{font-size:13px;color:var(--muted)}
 .meal.add .dot{border:1.5px dashed var(--line2);color:var(--muted);font-size:20px}
 .meal.add .t b{font-weight:500;color:var(--muted)}
 /* objetivos */
-.goals{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.goals .v{font-size:24px;font-weight:700;letter-spacing:-.02em;margin:4px 0 8px}
-.goals .v small{font-size:.62em;font-weight:500;color:var(--muted)}
+.goals{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.goals .v{font-size:22px;font-weight:700;letter-spacing:-.02em;margin:4px 0 8px}
+.goals .v small{font-size:.58em;font-weight:500;color:var(--muted)}
 .wk{display:flex;gap:4px}
 .wk i{flex:1;height:8px;border-radius:4px;background:var(--h0)}
 .wk i.ok{background:var(--ink)}.wk i.part{background:var(--h1)}.wk i.fut{background:transparent;border:1px dashed var(--line2)}
@@ -179,6 +179,35 @@ ol.steps li{margin-bottom:4px}
 .toast small{display:block;font-size:12px;color:var(--muted)}
 .toast b{display:block;font-size:15px}
 .toast span{display:block;font-size:14px}
+/* partes de cada comida */
+.psec{margin-top:16px}
+.part-h{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted);margin-bottom:7px;font-weight:650;text-transform:uppercase;letter-spacing:.08em}
+.part-h button{font-size:13px;color:var(--ink);text-transform:none;letter-spacing:0;font-weight:600}
+.top-h{margin:14px 0 2px}
+.top-h + .row{border-top:0;padding-top:4px}
+.irow{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.irow .inp{flex:1;min-width:0}
+.qty{display:flex;align-items:center;border:1px solid var(--line2);border-radius:12px;height:46px;flex:none;background:#fafaf9}
+.qty button{width:36px;height:100%;font-size:19px;color:var(--muted)}
+.qty b{min-width:22px;text-align:center;font-size:15px}
+.sugg{margin-top:2px}
+.tgl{display:inline-flex;background:var(--soft);border-radius:10px;padding:3px}
+.tgl button{height:26px;padding:0 10px;border-radius:8px;font-size:12px!important;color:var(--muted)!important;font-weight:600}
+.tgl button.on{background:var(--card);color:var(--ink)!important;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+/* agua */
+.cups{display:grid;grid-template-columns:repeat(8,1fr);gap:4px}
+.cup{height:44px;display:grid;place-items:center;color:var(--line2)}
+.cup svg{width:24px;height:30px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round}
+.cup .fill{fill:transparent;stroke:none}
+.cup.on{color:var(--ink)}.cup.on .fill{fill:#6aa6e6}
+.wrow{display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:10px}
+.step{display:flex;gap:8px}
+.step button{width:42px;height:42px;border-radius:50%;border:1px solid var(--line2);font-size:21px;background:var(--card)}
+.step button:last-child{background:var(--ink);color:#fff;border-color:var(--ink)}
+/* ajustes de comidas */
+.slotbox{padding:10px 0 12px;border-bottom:1px solid var(--line);margin-bottom:10px}
+.slotbox .slotrow{margin-bottom:6px}
+.inp.parts{height:40px;font-size:14px;color:var(--muted)}
 .hide{display:none!important}
 @media (min-width:760px){
   .wrap{max-width:980px}
@@ -217,7 +246,17 @@ const MONTHS = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov
 const MONTHS_L = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 const DAYS_L = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
 const WD = ['L','M','X','J','V','S','D'];
-const SNACK = { id:'snack', name:'Snack', color:'#ead0d6', emoji:'🍎' };
+const DEFAULT_SLOTS = [
+  { id:'des', name:'Desayuno', parts:['Bebida','Panes','Acompañamiento'] },
+  { id:'alm', name:'Almuerzo', parts:['Entrada','Segundo','Postre','Bebida'] },
+  { id:'lon', name:'Lonche', parts:['Bebida','Panes','Acompañamiento'] },
+  { id:'cen', name:'Cena', parts:['Entrada','Segundo','Postre','Bebida'] }
+];
+const DEFAULT_EXTRA = { id:'extra', name:'Extra', parts:['Bebida','Postre o dulce','Snack','Otro'] };
+const EXTRA_COLOR = 'radial-gradient(circle at 35% 30%,#f6dde3,#e2aab7)';
+const PLACEHOLDERS = { 'Bebida':'Ej. Café con leche', 'Panes':'Ej. Pan francés', 'Acompañamiento':'Ej. Palta, huevo, queso',
+  'Entrada':'Ej. Papa a la huancaína', 'Segundo':'Ej. Lomo saltado', 'Postre':'Ej. Mazamorra morada',
+  'Postre o dulce':'Ej. Alfajor', 'Snack':'Ej. Papitas', 'Otro':'Ej. Chicle' };
 const SLOT_STYLE = {
   des:{ color:'radial-gradient(circle at 35% 30%,#f7e7c2,#e3c487)', emoji:'' },
   alm:{ color:'radial-gradient(circle at 35% 30%,#e3f0dc,#b9d6aa)', emoji:'' },
@@ -237,6 +276,10 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 const fmtN = n => (n < 0 ? '−' : '') + String(Math.round(Math.abs(n))).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 const km = steps => (steps * S.settings.strideCm / 100000).toFixed(1).replace('.', ',') + ' km';
 const nowHM = () => { const d = new Date(); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const fmtQty = q => String(+q || 1).replace('.', ',');
+const itemTxt = it => (+it.qty || 1) !== 1 ? `${it.name} ×${fmtQty(it.qty)}` : it.name;
+const mealSummary = m => (m.items || []).map(itemTxt).join(' · ');
+const liters = n => String(Math.round(n * S.settings.glassMl / 10) / 100).replace('.', ',') + ' L';
 const dShort = s => { const d = parse(s); return `${d.getDate()} ${MONTHS[d.getMonth()]}`; };
 const dLong = s => { const d = parse(s); return `${DAYS_L[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`; };
 const cap = s => s ? s[0].toUpperCase() + s.slice(1) : s;
@@ -246,17 +289,33 @@ const $ = s => document.querySelector(s);
 function defaults() {
   return {
     version: 1, createdAt: Date.now(),
-    settings: { name: '', stepGoal: 10000, strideCm: 73 },
-    slots: [ { id:'des', name:'Desayuno' }, { id:'alm', name:'Almuerzo' }, { id:'lon', name:'Lonche' }, { id:'cen', name:'Cena' } ],
+    settings: { name: '', stepGoal: 10000, strideCm: 73, waterGoal: 8, glassMl: 250 },
+    slots: JSON.parse(JSON.stringify(DEFAULT_SLOTS)),
+    extra: JSON.parse(JSON.stringify(DEFAULT_EXTRA)),
     steps: {},   // 'AAAA-MM-DD': pasos totales del día
-    meals: []    // { id, date, slot, time, text }
+    water: {},   // 'AAAA-MM-DD': vasos de agua
+    meals: []    // { id, date, slot, time, items: [{ part, name, qty }] }
   };
 }
 let S;
 function load() {
   try { S = JSON.parse(localStorage.getItem(KEY)); } catch (e) { S = null; }
   if (!S || !S.settings || !Array.isArray(S.meals)) S = defaults();
-  S.steps = S.steps || {}; S.slots = S.slots && S.slots.length ? S.slots : defaults().slots;
+  S.steps = S.steps || {}; S.water = S.water || {};
+  S.slots = S.slots && S.slots.length ? S.slots : defaults().slots;
+  S.settings.waterGoal = S.settings.waterGoal || 8; S.settings.glassMl = S.settings.glassMl || 250;
+  S.slots.forEach(sl => { if (!Array.isArray(sl.parts) || !sl.parts.length) { const d = DEFAULT_SLOTS.find(x => x.id === sl.id); sl.parts = d ? d.parts.slice() : ['Plato', 'Bebida']; } });
+  if (!S.extra || !Array.isArray(S.extra.parts)) S.extra = JSON.parse(JSON.stringify(DEFAULT_EXTRA));
+  // Migración de la v1: una sola descripción por comida → partes con cantidad
+  S.meals.forEach(m => {
+    const wasSnack = m.slot === 'snack';
+    if (wasSnack) m.slot = 'extra';
+    if (!Array.isArray(m.items)) {
+      const sl = slotById(m.slot);
+      m.items = m.text ? [{ part: wasSnack ? 'Snack' : (sl ? sl.parts[0] : 'Otro'), name: m.text, qty: 1 }] : [];
+      delete m.text;
+    }
+  });
 }
 function save() {
   try { localStorage.setItem(KEY, JSON.stringify(S)); }
@@ -267,11 +326,13 @@ function save() {
 const stepsOn = d => S.steps[d] || 0;
 const goal = () => S.settings.stepGoal || 10000;
 const mealsOn = d => S.meals.filter(m => m.date === d).sort((a, b) => (a.time || '').localeCompare(b.time || ''));
-const slotById = id => S.slots.find(s => s.id === id) || (id === 'snack' ? SNACK : null);
+const slotById = id => S.slots.find(s => s.id === id) || (id === 'extra' ? S.extra : null);
+const allSlots = () => [...S.slots, S.extra];
+const waterOn = d => S.water[d] || 0;
 const slotName = id => (slotById(id) || { name: 'Otra' }).name;
 function slotStyle(id) {
   if (SLOT_STYLE[id]) return SLOT_STYLE[id].color;
-  if (id === 'snack') return SNACK.color;
+  if (id === 'extra') return EXTRA_COLOR;
   return EXTRA_COLORS[[...id].reduce((a, c) => a + c.charCodeAt(0), 0) % EXTRA_COLORS.length];
 }
 const filledSlots = d => { const ids = new Set(mealsOn(d).map(m => m.slot)); return S.slots.filter(s => ids.has(s.id)).length; };
@@ -290,7 +351,7 @@ function suggestSlot(date) {
   const done = new Set(mealsOn(date).map(m => m.slot));
   if (ideal && S.slots.some(s => s.id === ideal) && !done.has(ideal)) return ideal;
   const free = S.slots.find(s => !done.has(s.id));
-  return free ? free.id : (ideal && S.slots.some(s => s.id === ideal) ? ideal : 'snack');
+  return free ? free.id : (ideal && S.slots.some(s => s.id === ideal) ? ideal : 'extra');
 }
 
 /* ================= Piezas ================= */
@@ -316,19 +377,27 @@ function bars(days, label, opts = {}) {
 function mealList(date) {
   const ms = mealsOn(date);
   const rows = [];
-  const order = [...S.slots.map(s => s.id), 'snack'];
   const used = new Set();
-  order.forEach(id => {
-    const these = ms.filter(m => m.slot === id);
+  S.slots.forEach(sl => {
+    const these = ms.filter(m => m.slot === sl.id);
     these.forEach(m => { used.add(m.id); rows.push(mealRow(m)); });
-    if (!these.length && id !== 'snack') rows.push(`<button class="meal add" data-act="addmeal" data-d="${date}" data-slot="${id}"><span class="dot">+</span><span class="t"><b>Añadir ${esc(slotName(id).toLowerCase())}</b></span></button>`);
+    if (!these.length) rows.push(`<button class="meal add" data-act="addmeal" data-d="${date}" data-slot="${sl.id}"><span class="dot">+</span><span class="t"><b>Añadir ${esc(sl.name.toLowerCase())}</b></span></button>`);
   });
-  ms.filter(m => !used.has(m.id)).forEach(m => rows.push(mealRow(m)));
+  ms.filter(m => !used.has(m.id)).forEach(m => rows.push(mealRow(m)));   // extras y comidas sueltas
+  rows.push(`<button class="meal add" data-act="addmeal" data-d="${date}" data-slot="extra"><span class="dot">+</span><span class="t"><b>Añadir extra</b><span>Gaseosa, postre, algo suelto…</span></span></button>`);
   return rows.join('');
 }
 function mealRow(m) {
   return `<button class="meal" data-act="editmeal" data-id="${m.id}"><span class="dot" style="background:${slotStyle(m.slot)}"></span>
-    <span class="t"><b>${esc(slotName(m.slot))}</b><span>${esc(m.text) || '—'}</span></span><span class="h">${esc(m.time || '')}</span></button>`;
+    <span class="t"><b>${esc(slotName(m.slot))}</b><span>${esc(mealSummary(m)) || '—'}</span></span><span class="h">${esc(m.time || '')}</span></button>`;
+}
+const CUP = '<svg viewBox="0 0 24 28"><path class="fill" d="M6.3 11h11.4l-1.1 12.2a1.6 1.6 0 0 1-1.6 1.5H9a1.6 1.6 0 0 1-1.6-1.5z"/><path d="M4.5 3.5h15l-1.8 20a2 2 0 0 1-2 1.8H8.3a2 2 0 0 1-2-1.8z"/></svg>';
+function waterCard(d) {
+  const n = waterOn(d), g = S.settings.waterGoal, cups = Math.max(g, n);
+  return `<div class="card"><h2>Agua <span>${n} / ${g} vasos</span></h2>
+    <div class="cups">${Array.from({ length: cups }, (_, i) => `<button class="cup ${i < n ? 'on' : ''}" data-act="cup" data-d="${d}" data-i="${i}" aria-label="Vaso ${i + 1}">${CUP}</button>`).join('')}</div>
+    <div class="wrow"><span class="lbl">${n >= g ? '<b style="color:var(--green)">¡Meta cumplida!</b> · ' : ''}${liters(n)} de ${liters(g)}</span>
+      <div class="step"><button data-act="water" data-d="${d}" data-v="-1" aria-label="Quitar vaso">−</button><button data-act="water" data-d="${d}" data-v="1" aria-label="Añadir vaso">+</button></div></div></div>`;
 }
 function heatCells(start, end, cal) {
   const t = todayISO();
@@ -380,6 +449,7 @@ function viewHoy() {
   const past = wdays.filter(d => d <= t);
   const stepOk = past.filter(d => stepsOn(d) >= g).length;
   const mealOk = past.filter(d => filledSlots(d) >= S.slots.length).length;
+  const wg = S.settings.waterGoal, waterOk = past.filter(d => waterOn(d) >= wg).length;
   const wkBar = fn => `<div class="wk">${wdays.map(d => d > t ? '<i class="fut"></i>' : `<i class="${fn(d)}"></i>`).join('')}</div>`;
   const m = monthOf(now);
   return `
@@ -390,10 +460,12 @@ function viewHoy() {
     <div class="card dark"><div class="avg"><div><div class="lbl">${avgCard.title}</div><div class="v">${fmtN(avgCard.v)}</div></div>${avgCard.delta}</div>${avgCard.chart}</div>
     <div class="card"><h2>Comidas <span>${filledSlots(t)} / ${S.slots.length}</span></h2>${mealList(t)}</div>
   </div>
+  ${waterCard(t)}
   <div class="card"><h2>Objetivo cumplido <span>esta semana</span></h2>
     <div class="goals">
       <div><div class="lbl">${fmtN(g)} pasos</div><div class="v">${stepOk} <small>de ${past.length} días</small></div>${wkBar(d => stepsOn(d) >= g ? 'ok' : stepsOn(d) ? 'part' : '')}</div>
       <div><div class="lbl">${S.slots.length} comidas</div><div class="v">${mealOk} <small>de ${past.length} días</small></div>${wkBar(d => filledSlots(d) >= S.slots.length ? 'ok' : filledSlots(d) ? 'part' : '')}</div>
+      <div><div class="lbl">${wg} vasos</div><div class="v">${waterOk} <small>de ${past.length} días</small></div>${wkBar(d => waterOn(d) >= wg ? 'ok' : waterOn(d) ? 'part' : '')}</div>
     </div></div>
   <div class="card"><h2>Historial · ${MONTHS_L[now.getMonth()]} ${legend}</h2><div class="heat">${heatCells(m.start, m.end)}</div></div>`;
 }
@@ -438,21 +510,41 @@ function viewComidas() {
   const t = todayISO();
   const last7 = range(iso(addDays(new Date(), -6)), t).reverse();
   const rows = last7.map(d => {
-    const ids = new Set(mealsOn(d).map(m => m.slot));
-    return `<button class="row" data-act="mealday" data-d="${d}"><span class="t">${d === t ? 'Hoy' : esc(cap(dLong(d)))}<small>${mealsOn(d).length} registradas</small></span>
+    const ms = mealsOn(d), ids = new Set(ms.map(m => m.slot)), ex = ms.filter(m => m.slot === 'extra').length;
+    return `<button class="row" data-act="mealday" data-d="${d}"><span class="t">${d === t ? 'Hoy' : esc(cap(dLong(d)))}<small>${ex ? `${ex} extra${ex > 1 ? 's' : ''} · ` : ''}💧 ${waterOn(d)} vasos</small></span>
       <span class="slots">${S.slots.map(s => `<i class="${ids.has(s.id) ? 'ok' : ''}" title="${esc(s.name)}"></i>`).join('')}</span><span class="n" style="min-width:34px;text-align:right">${filledSlots(d)}/${S.slots.length}</span></button>`;
   }).join('');
-  // Lo que más repites (para acordarte)
-  const freq = {};
-  S.meals.forEach(m => { const k = (m.text || '').trim().toLowerCase(); if (k) freq[k] = (freq[k] || 0) + 1; });
-  const top = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 5);
   return `
   <header class="top"><div class="hello"><small>Lo que comes</small><h1><b>Comidas</b></h1></div>${gear}</header>
   <div class="nav"><button data-act="mealnav" data-v="-1" aria-label="Día anterior">${chev(-1)}</button><span>${esc(dayLabel(mealDay))}</span><button data-act="mealnav" data-v="1" ${mealDay >= t ? 'disabled' : ''} aria-label="Día siguiente">${chev(1)}</button></div>
-  <div class="card"><h2>${mealDay === t ? 'Hoy' : 'Ese día'} <span>${filledSlots(mealDay)} / ${S.slots.length}</span></h2>${mealList(mealDay)}
-    <div class="mt"><button class="btn sm" data-act="addmeal" data-d="${mealDay}" data-slot="snack">+ Añadir snack</button></div></div>
-  <div class="card"><h2>Últimos 7 días</h2>${rows}</div>
-  ${top.length ? `<div class="card"><h2>Lo que más comes</h2>${top.map(([k, n]) => `<div class="row"><span class="t" style="text-transform:none">${esc(k[0].toUpperCase() + k.slice(1))}</span><span class="n">${n}×</span></div>`).join('')}</div>` : ''}`;
+  <div class="card"><h2>${mealDay === t ? 'Hoy' : 'Ese día'} <span>${filledSlots(mealDay)} / ${S.slots.length}</span></h2>${mealList(mealDay)}</div>
+  ${waterCard(mealDay)}
+  ${topCard()}
+  <div class="card"><h2>Últimos 7 días</h2>${rows}</div>`;
+}
+
+// Ranking por comida y por parte (bebidas del desayuno, segundos del almuerzo…)
+let topSlot = 'des', topRange = 'mes';
+function topCard() {
+  const m = monthOf(new Date());
+  if (!slotById(topSlot)) topSlot = S.slots[0].id;
+  const sl = slotById(topSlot);
+  const meals = S.meals.filter(x => x.slot === topSlot && (topRange === 'todo' || (x.date >= m.start && x.date <= m.end)));
+  const byPart = {};
+  meals.forEach(x => (x.items || []).forEach(it => {
+    const k = (it.name || '').trim().toLowerCase(); if (!k) return;
+    const P = byPart[it.part] = byPart[it.part] || {};
+    const e = P[k] = P[k] || { name: cap(it.name.trim()), n: 0, q: 0 };
+    e.n++; e.q += +it.qty || 1;
+  }));
+  const parts = [...sl.parts, ...Object.keys(byPart).filter(p => !sl.parts.includes(p))].filter(p => byPart[p]);
+  const body = parts.length ? parts.map(p => `<div class="part-h top-h">${esc(p)}</div>` +
+    Object.values(byPart[p]).sort((a, b) => b.n - a.n || b.q - a.q).slice(0, 5).map(e =>
+      `<div class="row"><span class="t">${esc(e.name)}</span><span class="lbl">${e.n} ${e.n === 1 ? 'vez' : 'veces'}${e.q !== e.n ? ` · ${fmtQty(e.q)} en total` : ''}</span></div>`).join('')).join('')
+    : `<div class="empty">Aún no hay ${esc(sl.name.toLowerCase())}s registrados ${topRange === 'mes' ? 'este mes' : ''}.</div>`;
+  return `<div class="card"><h2>Lo que más comes <span class="tgl"><button class="${topRange === 'mes' ? 'on' : ''}" data-act="toprange" data-v="mes">Este mes</button><button class="${topRange === 'todo' ? 'on' : ''}" data-act="toprange" data-v="todo">Todo</button></span></h2>
+    <div class="chips">${allSlots().map(x => `<button class="chip s ${x.id === topSlot ? 'on' : ''}" data-act="topslot" data-id="${x.id}">${esc(x.name)}</button>`).join('')}</div>
+    ${body}</div>`;
 }
 
 function viewHistorial() {
@@ -462,7 +554,11 @@ function viewHistorial() {
   const days = range(m.start, m.end), past = days.filter(d => d <= t), s = sumAvg(days);
   const ok = past.filter(d => stepsOn(d) >= g).length;
   const okM = past.filter(d => filledSlots(d) >= S.slots.length).length;
-  const nMeals = S.meals.filter(x => x.date >= m.start && x.date <= m.end).length;
+  const inM = S.meals.filter(x => x.date >= m.start && x.date <= m.end);
+  const nMeals = inM.filter(x => x.slot !== 'extra').length, nExtra = inM.filter(x => x.slot === 'extra').length;
+  const wg = S.settings.waterGoal, okW = past.filter(d => waterOn(d) >= wg).length;
+  const wAvg = past.length ? past.reduce((a, d) => a + waterOn(d), 0) / past.length : 0;
+  const mo = m.start.slice(0, 7), mName = MONTHS_L[base.getMonth()];
   return `
   <header class="top"><div class="hello"><small>Mes a mes</small><h1><b>Historial</b></h1></div>${gear}</header>
   <div class="nav"><button data-act="histnav" data-v="-1" aria-label="Mes anterior">${chev(-1)}</button><span>${cap(MONTHS_L[base.getMonth()])} ${base.getFullYear()}</span><button data-act="histnav" data-v="1" ${histOff >= 0 ? 'disabled' : ''} aria-label="Mes siguiente">${chev(1)}</button></div>
@@ -472,7 +568,11 @@ function viewHistorial() {
   <div class="card"><h2>Resumen</h2>
     <div class="stats" style="margin-top:0"><div><b>${ok} / ${past.length}</b><span>Días con ${fmtN(g)} pasos</span></div><div><b>${okM} / ${past.length}</b><span>Días con ${S.slots.length} comidas</span></div><div><b>${fmtN(s.avg)}</b><span>Media de pasos</span></div></div>
     <div class="stats"><div><b>${fmtN(s.total)}</b><span>Pasos en total</span></div><div><b>${km(s.total).replace(' km', '')}</b><span>Kilómetros</span></div><div><b>${nMeals}</b><span>Comidas registradas</span></div></div>
-  </div>`;
+    <div class="stats"><div><b>${okW} / ${past.length}</b><span>Días con ${wg} vasos</span></div><div><b>${String(Math.round(wAvg * 10) / 10).replace('.', ',')}</b><span>Vasos de agua / día</span></div><div><b>${nExtra}</b><span>Extras</span></div></div>
+  </div>
+  <div class="card"><h2>Exportar ${mName}</h2>
+    <div class="hint" style="margin-top:0">Para analizarlo a fin de mes. Se abre en Excel o Google Sheets.</div>
+    <div class="cta"><button class="btn ink" data-act="csvdetail" data-m="${mo}">CSV detallado (cada alimento)</button><button class="btn" data-act="csvdaily" data-m="${mo}">CSV resumen por día</button></div></div>`;
 }
 
 function viewAjustes() {
@@ -483,12 +583,17 @@ function viewAjustes() {
     <div class="setrow"><label for="s-name">Tu nombre</label><input class="inp" id="s-name" value="${esc(st.name)}" placeholder="Opcional" style="text-align:right"></div>
     <div class="setrow"><label for="s-goal">Meta de pasos al día</label><input class="inp" id="s-goal" inputmode="numeric" value="${st.stepGoal}"></div>
     <div class="setrow"><label for="s-stride">Largo de tu paso (cm)<div class="hint" style="margin:2px 0 0">Para calcular los km. Unos 73 cm es lo normal.</div></label><input class="inp" id="s-stride" inputmode="numeric" value="${st.strideCm}"></div>
+    <div class="setrow"><label for="s-water">Meta de agua (vasos al día)</label><input class="inp" id="s-water" inputmode="numeric" value="${st.waterGoal}"></div>
+    <div class="setrow"><label for="s-glass">Tamaño del vaso (ml)</label><input class="inp" id="s-glass" inputmode="numeric" value="${st.glassMl}"></div>
     <div class="cta"><button class="btn ink" data-act="savesettings">Guardar</button></div></div>
   <div class="card"><h2>Comidas del día <span>meta: ${S.slots.length}</span></h2>
-    ${S.slots.map((s, i) => `<div class="slotrow"><input class="inp" id="slot-${i}" value="${esc(s.name)}"><button data-act="delslot" data-i="${i}" aria-label="Quitar">✕</button></div>`).join('')}
+    ${S.slots.map((s, i) => `<div class="slotbox"><div class="slotrow"><input class="inp" id="slot-${i}" value="${esc(s.name)}" style="font-weight:600"><button data-act="delslot" data-i="${i}" aria-label="Quitar">✕</button></div>
+      <input class="inp parts" id="parts-${i}" value="${esc(s.parts.join(', '))}" placeholder="Partes, separadas por comas"></div>`).join('')}
+    <div class="slotbox"><div class="lbl" style="margin-bottom:6px"><b style="color:var(--ink)">Extra</b> · no cuenta para la meta</div>
+      <input class="inp parts" id="parts-extra" value="${esc(S.extra.parts.join(', '))}" placeholder="Partes, separadas por comas"></div>
     <div class="slotrow"><input class="inp" id="newslot" placeholder="Añadir otra (p. ej. Media mañana)"><button data-act="addslot" aria-label="Añadir" style="color:var(--ink)">+</button></div>
-    <div class="cta"><button class="btn" data-act="saveslots">Guardar nombres</button></div>
-    <div class="hint">La meta de comidas es cuántas tienes en esta lista. El “Snack” va aparte y no cuenta para la meta.</div></div>
+    <div class="cta"><button class="btn" data-act="saveslots">Guardar comidas y partes</button></div>
+    <div class="hint">Debajo de cada comida están sus partes (bebida, panes, entrada, segundo…), separadas por comas. La meta de comidas es cuántas tienes en esta lista.</div></div>
   <div class="card"><h2>Pasos desde la app Salud</h2>
     <div class="hint" style="margin-top:0">Una web no puede leer Salud directamente, así que se hace con un Atajo que copia tus pasos de hoy. Créalo una vez en la app <b>Atajos</b>:</div>
     <ol class="steps"><li>Nuevo atajo → <b>Buscar muestras de salud</b>: tipo <i>Pasos</i>, fecha de inicio <i>es hoy</i>.</li>
@@ -498,7 +603,12 @@ function viewAjustes() {
     <div class="hint">También puedes escribir el número a mano mirando Salud.</div></div>
   <div class="card"><h2>Copia de seguridad</h2>
     <div class="hint" style="margin-top:0">Tus datos se guardan solo en este iPhone. Exporta una copia de vez en cuando (por ejemplo a iCloud Drive).</div>
-    <div class="cta"><button class="btn ink" data-act="export">Exportar copia</button><button class="btn" data-act="import">Importar copia</button><button class="btn" data-act="csv">Exportar a Excel (CSV)</button></div></div>
+    <div class="cta"><button class="btn ink" data-act="export">Exportar copia</button><button class="btn" data-act="import">Importar copia</button></div></div>
+  <div class="card"><h2>Exportar a CSV</h2>
+    <div class="hint" style="margin-top:0">Todo en un archivo para analizarlo en Excel o Google Sheets: comidas con sus partes y cantidades, extras, agua y pasos.</div>
+    <label class="f-lbl" for="exp-month">Periodo</label>
+    <select class="inp" id="exp-month"><option value="">Todo</option>${dataMonths().map(m => `<option value="${m}">${cap(MONTHS_L[+m.slice(5) - 1])} ${m.slice(0, 4)}</option>`).join('')}</select>
+    <div class="cta"><button class="btn ink" data-act="csvdetail">CSV detallado (cada alimento)</button><button class="btn" data-act="csvdaily">CSV resumen por día</button></div></div>
   <div class="card"><div class="cta" style="margin-top:0"><button class="btn danger" data-act="reset">Borrar todos los datos</button></div></div>`;
 }
 
@@ -517,30 +627,54 @@ function mealForm(m, isNew) {
   sheetCtx = { kind: 'meal', m, isNew };
   drawMealForm();
 }
-function drawMealForm(keepFocus) {
+// Partes de la comida elegida + las que ya tenga el registro (si cambiaste la lista en Ajustes)
+function partsFor(m) {
+  const sl = slotById(m.slot), base = sl ? sl.parts.slice() : [];
+  m.items.forEach(it => { if (it.part && !base.includes(it.part)) base.push(it.part); });
+  return base;
+}
+function ensureRows(m) { partsFor(m).forEach(p => { if (!m.items.some(it => it.part === p)) m.items.push({ part: p, name: '', qty: 1 }); }); }
+// Lo último que pusiste en esa parte (primero en esta comida, luego en cualquiera)
+function suggestions(slot, part, exclude) {
+  const out = [], seen = new Set(exclude.map(x => x.toLowerCase()));
+  const sorted = S.meals.slice().sort((a, b) => (b.date + (b.time || '')).localeCompare(a.date + (a.time || '')));
+  const add = it => { const n = (it.name || '').trim(), k = n.toLowerCase(); if (k && !seen.has(k) && out.length < 5) { seen.add(k); out.push(n); } };
+  sorted.forEach(m => m.slot === slot && m.items.forEach(it => it.part === part && add(it)));
+  sorted.forEach(m => m.items.forEach(it => it.part === part && add(it)));
+  return out;
+}
+function drawMealForm() {
   const { m, isNew } = sheetCtx;
-  const opts = [...S.slots, SNACK];
+  ensureRows(m);
+  const opts = allSlots();
   if (!opts.some(s => s.id === m.slot)) opts.push({ id: m.slot, name: slotName(m.slot) });
-  // Sugerencias: lo último que comiste en esa comida
-  const seen = new Set(), sugg = [];
-  S.meals.slice().sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time)).forEach(x => {
-    const k = (x.text || '').trim(); if (x.slot === m.slot && k && !seen.has(k.toLowerCase()) && sugg.length < 6) { seen.add(k.toLowerCase()); sugg.push(k); }
-  });
+  const ph = p => m.slot === 'extra' && p === 'Bebida' ? 'Ej. Gaseosa' : (PLACEHOLDERS[p] || 'Qué fue');
+  const sections = partsFor(m).map(p => {
+    const rows = m.items.map((it, k) => ({ it, k })).filter(x => x.it.part === p);
+    const sug = suggestions(m.slot, p, rows.map(x => x.it.name).filter(Boolean));
+    return `<div class="psec"><div class="part-h"><span>${esc(p)}</span><button data-act="addrow" data-p="${esc(p)}">+ otro</button></div>
+      ${rows.map(({ it, k }) => `<div class="irow"><input class="inp" id="it-${k}" value="${esc(it.name)}" placeholder="${esc(ph(p))}" autocomplete="off" enterkeyhint="next">
+        <div class="qty"><button data-act="qty" data-k="${k}" data-v="-1" aria-label="Menos">−</button><b>${fmtQty(it.qty)}</b><button data-act="qty" data-k="${k}" data-v="1" aria-label="Más">+</button></div></div>`).join('')}
+      ${sug.length ? `<div class="chips sugg">${sug.map(x => `<button class="chip s" data-act="sugg" data-p="${esc(p)}" data-v="${esc(x)}">${esc(x)}</button>`).join('')}</div>` : ''}</div>`;
+  }).join('');
   const html = `
     ${isNew ? `<div class="seg"><button class="on">Comida</button><button data-act="toSteps">Pasos</button></div>` : ''}
-    <h3>${isNew ? 'Añadir comida' : 'Editar comida'}<button data-act="close">Cerrar</button></h3>
+    <h3>${isNew ? 'Añadir' : 'Editar'} ${esc(slotName(m.slot).toLowerCase())}<button data-act="close">Cerrar</button></h3>
     <div class="chips">${opts.map(s => `<button class="chip ${s.id === m.slot ? 'on' : ''}" data-act="pickslot" data-id="${s.id}">${esc(s.name)}</button>`).join('')}</div>
-    <label class="f-lbl" for="m-text">¿Qué comiste?</label>
-    <input class="inp" id="m-text" value="${esc(m.text)}" placeholder="Ej. Avena, yogur y fruta" autocomplete="off">
-    ${sugg.length ? `<div class="chips" style="margin-top:8px">${sugg.map(s => `<button class="chip s" data-act="sugg" data-v="${esc(s)}">${esc(s)}</button>`).join('')}</div>` : ''}
+    ${sections}
+    <div class="hint">Llena solo lo que comiste; lo vacío no se guarda. Usa − + para la cantidad (½ también vale).</div>
     <div class="f2"><div><label class="f-lbl" for="m-time">Hora</label><input class="inp" id="m-time" type="time" value="${esc(m.time)}"></div>
       <div><label class="f-lbl" for="m-date">Día</label><input class="inp" id="m-date" type="date" value="${m.date}" max="${todayISO()}"></div></div>
     <div class="cta"><button class="btn ink" data-act="savemeal">Guardar</button>${isNew ? '' : '<button class="btn danger" data-act="delmeal">Eliminar</button>'}</div>`;
-  const prev = sheetCtx;
-  openSheet(html, prev);
-  if (keepFocus) { const i = $('#m-text'); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }
+  const keep = $('#sheet').classList.contains('on') ? $('#sheet').scrollTop : 0;
+  openSheet(html, sheetCtx);
+  $('#sheet').scrollTop = keep;
 }
-function readMealForm() { const m = sheetCtx.m; m.text = $('#m-text').value.trim(); m.time = $('#m-time').value; m.date = $('#m-date').value || m.date; }
+function readMealForm() {
+  const m = sheetCtx.m;
+  m.items.forEach((it, k) => { const el = $('#it-' + k); if (el) it.name = el.value.trim(); });
+  m.time = $('#m-time').value; m.date = $('#m-date').value || m.date;
+}
 
 function stepsForm(date, fromNew) {
   sheetCtx = { kind: 'steps', date, fromNew };
@@ -562,7 +696,7 @@ function dayForm(d) {
   openSheet(`
     <h3><span>${esc(dayLabel(d))}</span><button data-act="close">Cerrar</button></h3>
     <div class="card soft hero" style="min-height:0" ${fut ? '' : `data-act="steps" data-d="${d}"`}><div><div class="lbl">Pasos</div><div class="big" style="font-size:40px">${fmtN(n)}</div><div class="sub">${n ? km(n) : fut ? 'Todavía no llega' : 'Toca para registrar'}</div></div>${ring(n / goal())}</div>
-    ${fut ? '' : `<div class="card" style="margin-bottom:0"><h2>Comidas <span>${filledSlots(d)} / ${S.slots.length}</span></h2>${mealList(d)}</div>`}`, sheetCtx);
+    ${fut ? '' : `<div class="card" style="margin-bottom:0"><h2>Comidas <span>${filledSlots(d)} / ${S.slots.length}</span></h2>${mealList(d)}</div>${waterCard(d).replace('class="card"', 'class="card" style="margin:12px 0 0"')}`}`, sheetCtx);
 }
 
 /* ================= Aviso ================= */
@@ -584,15 +718,53 @@ function download(name, text, type) {
   a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name;
   document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 }
-function exportCSV() {
-  const q = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
-  const dates = [...new Set([...Object.keys(S.steps), ...S.meals.map(m => m.date)])].sort();
-  const lines = [['Fecha', 'Tipo', 'Comida', 'Hora', 'Detalle', 'Pasos'].join(';')];
-  dates.forEach(d => {
-    if (S.steps[d] != null) lines.push([d, 'Pasos', '', '', '', S.steps[d]].map(q).join(';'));
-    mealsOn(d).forEach(m => lines.push([d, 'Comida', slotName(m.slot), m.time, m.text, ''].map(q).join(';')));
+const csvQ = v => typeof v === 'number' ? String(v).replace('.', ',') : `"${String(v ?? '').replace(/"/g, '""')}"`;
+const csvLine = arr => arr.map(csvQ).join(';');
+function dataMonths() {
+  const ds = [...Object.keys(S.steps), ...Object.keys(S.water), ...S.meals.map(m => m.date), todayISO()];
+  return [...new Set(ds.map(d => d.slice(0, 7)))].sort().reverse();
+}
+// Días a exportar: el mes elegido (hasta hoy) o desde el primer registro
+function exportDays(mo) {
+  const t = todayISO();
+  if (mo) { const end = iso(new Date(+mo.slice(0, 4), +mo.slice(5), 0)); return range(mo + '-01', end < t ? end : t); }
+  const ds = [...Object.keys(S.steps), ...Object.keys(S.water), ...S.meals.map(m => m.date)].sort();
+  return range(ds[0] && ds[0] < t ? ds[0] : t, t);
+}
+const fileTag = mo => mo || 'todo';
+function exportDetail(mo) {
+  const lines = [csvLine(['Fecha', 'Mes', 'Día', 'Tipo', 'Comida', 'Hora', 'Parte', 'Alimento', 'Cantidad', 'Unidad'])];
+  exportDays(mo).forEach(d => {
+    const base = [d, d.slice(0, 7), DAYS_L[parse(d).getDay()]];
+    mealsOn(d).forEach(m => (m.items || []).forEach(it =>
+      lines.push(csvLine([...base, m.slot === 'extra' ? 'Extra' : 'Comida', slotName(m.slot), m.time || '', it.part, it.name, +it.qty || 1, '']))));
+    if (waterOn(d)) lines.push(csvLine([...base, 'Agua', '', '', '', 'Agua', waterOn(d), `vasos de ${S.settings.glassMl} ml`]));
+    if (S.steps[d] != null) lines.push(csvLine([...base, 'Pasos', '', '', '', 'Pasos', S.steps[d], 'pasos']));
   });
-  download(`paso-${todayISO()}.csv`, '﻿' + lines.join('\n'), 'text/csv');
+  download(`paso-detalle-${fileTag(mo)}.csv`, '﻿' + lines.join('\r\n'), 'text/csv');
+  toast('CSV detallado listo', mo ? cap(MONTHS_L[+mo.slice(5) - 1]) + ' ' + mo.slice(0, 4) : 'Todos tus registros');
+}
+function exportDaily(mo) {
+  const g = goal(), wg = S.settings.waterGoal;
+  const lines = [csvLine(['Fecha', 'Día', 'Pasos', 'Km', 'Meta de pasos', 'Vasos de agua', 'Litros', 'Meta de agua',
+    `Comidas (de ${S.slots.length})`, ...S.slots.map(s => s.name), 'Extras', 'Detalle extras'])];
+  exportDays(mo).forEach(d => {
+    const n = stepsOn(d), ms = mealsOn(d), w = waterOn(d), ex = ms.filter(m => m.slot === 'extra');
+    lines.push(csvLine([d, DAYS_L[parse(d).getDay()], n, Math.round(n * S.settings.strideCm / 10000) / 10, n >= g ? 'Sí' : 'No',
+      w, Math.round(w * S.settings.glassMl / 10) / 100, w >= wg ? 'Sí' : 'No', filledSlots(d),
+      ...S.slots.map(s => ms.filter(m => m.slot === s.id).map(mealSummary).join(' | ')),
+      ex.length, ex.map(mealSummary).join(' | ')]));
+  });
+  download(`paso-resumen-${fileTag(mo)}.csv`, '﻿' + lines.join('\r\n'), 'text/csv');
+  toast('CSV resumen listo', mo ? cap(MONTHS_L[+mo.slice(5) - 1]) + ' ' + mo.slice(0, 4) : 'Todos tus registros');
+}
+function setWater(d, n) {
+  n = Math.max(0, Math.min(40, n));
+  const before = waterOn(d), wg = S.settings.waterGoal;
+  if (n) S.water[d] = n; else delete S.water[d];
+  save(); render();
+  if (sheetCtx && sheetCtx.kind === 'day') dayForm(d);
+  if (n >= wg && before < wg) toast('¡Meta de agua cumplida! 💧', `${n} vasos · ${liters(n)}`);
 }
 
 /* ================= Acciones ================= */
@@ -606,19 +778,38 @@ const actions = {
   histnav(el) { histOff = Math.min(0, histOff + +el.dataset.v); render(); },
   day(el) { dayForm(el.dataset.d); },
   steps(el) { stepsForm(el.dataset.d || todayISO(), false); },
-  addmeal(el) { const d = el.dataset.d || todayISO(); mealForm({ id: uid(), date: d, slot: el.dataset.slot || suggestSlot(d), time: d === todayISO() ? nowHM() : '', text: '' }, true); },
-  editmeal(el) { const m = S.meals.find(x => x.id === el.dataset.id); if (m) mealForm({ ...m }, false); },
+  addmeal(el) { const d = el.dataset.d || todayISO(); mealForm({ id: uid(), date: d, slot: el.dataset.slot || suggestSlot(d), time: d === todayISO() ? nowHM() : '', items: [] }, true); },
+  editmeal(el) { const m = S.meals.find(x => x.id === el.dataset.id); if (m) mealForm({ ...m, items: (m.items || []).map(i => ({ ...i })) }, false); },
   pickslot(el) { readMealForm(); sheetCtx.m.slot = el.dataset.id; drawMealForm(); },
-  sugg(el) { $('#m-text').value = el.dataset.v; },
+  sugg(el) {
+    readMealForm(); const m = sheetCtx.m, p = el.dataset.p;
+    const empty = m.items.find(it => it.part === p && !it.name);
+    if (empty) empty.name = el.dataset.v; else m.items.push({ part: p, name: el.dataset.v, qty: 1 });
+    drawMealForm();
+  },
+  addrow(el) { readMealForm(); sheetCtx.m.items.push({ part: el.dataset.p, name: '', qty: 1 }); drawMealForm(); const ins = document.querySelectorAll('#sheetBody .irow input'); ins[ins.length - 1] && ins[ins.length - 1].focus(); },
+  qty(el) {
+    readMealForm(); const it = sheetCtx.m.items[+el.dataset.k], q = +it.qty || 1;
+    it.qty = +el.dataset.v > 0 ? (q < 1 ? 1 : Math.min(q + 1, 50)) : (q > 1 ? q - 1 : 0.5);
+    drawMealForm();
+  },
+  topslot(el) { topSlot = el.dataset.id; render(); },
+  toprange(el) { topRange = el.dataset.v; render(); },
+  water(el) { setWater(el.dataset.d, waterOn(el.dataset.d) + +el.dataset.v); },
+  cup(el) { const i = +el.dataset.i, n = waterOn(el.dataset.d); setWater(el.dataset.d, i === n - 1 ? i : i + 1); },
+  csvdetail(el) { exportDetail(el.dataset.m != null ? el.dataset.m : ($('#exp-month') || {}).value || ''); },
+  csvdaily(el) { exportDaily(el.dataset.m != null ? el.dataset.m : ($('#exp-month') || {}).value || ''); },
   toSteps() { stepsForm(sheetCtx && sheetCtx.m ? sheetCtx.m.date : todayISO(), true); },
-  toMeal() { const d = sheetCtx ? sheetCtx.date : todayISO(); mealForm({ id: uid(), date: d, slot: suggestSlot(d), time: d === todayISO() ? nowHM() : '', text: '' }, true); },
+  toMeal() { const d = sheetCtx ? sheetCtx.date : todayISO(); mealForm({ id: uid(), date: d, slot: suggestSlot(d), time: d === todayISO() ? nowHM() : '', items: [] }, true); },
   savemeal() {
     readMealForm(); const m = sheetCtx.m, isNew = sheetCtx.isNew;
-    if (!m.text) { $('#m-text').focus(); toast('Escribe qué comiste'); return; }
+    m.items = m.items.filter(it => it.name).map(it => ({ part: it.part, name: it.name, qty: +it.qty || 1 }));
+    if (!m.items.length) { toast('Escribe al menos una cosa'); drawMealForm(); const i = $('#it-0'); i && i.focus(); return; }
     const i = S.meals.findIndex(x => x.id === m.id);
     if (i >= 0) S.meals[i] = m; else S.meals.push(m);
     save(); closeSheet(); render();
-    toast(`${slotName(m.slot)} ${isNew ? 'guardad' : 'actualizad'}${/a$/i.test(slotName(m.slot)) ? 'a' : 'o'}`, m.date === todayISO() ? leftMsg() : dLong(m.date));
+    const fem = /a$/i.test(slotName(m.slot)) && m.slot !== 'extra';
+    toast(`${slotName(m.slot)} ${isNew ? 'guardad' : 'actualizad'}${fem ? 'a' : 'o'}`, m.date === todayISO() ? leftMsg() : dLong(m.date));
   },
   delmeal() {
     if (!confirm('¿Eliminar esta comida?')) return;
@@ -644,20 +835,27 @@ const actions = {
   delsteps() { delete S.steps[sheetCtx.date]; save(); closeSheet(); render(); toast('Pasos borrados'); },
   savesettings() {
     const g = parseInt($('#s-goal').value.replace(/\D/g, ''), 10), s = parseInt($('#s-stride').value, 10);
+    const w = parseInt($('#s-water').value, 10), ml = parseInt($('#s-glass').value, 10);
+    if (w >= 1 && w <= 30) S.settings.waterGoal = w;
+    if (ml >= 50 && ml <= 1000) S.settings.glassMl = ml;
     S.settings.name = $('#s-name').value.trim();
     if (g >= 500 && g <= 100000) S.settings.stepGoal = g;
     if (s >= 30 && s <= 150) S.settings.strideCm = s;
     save(); render(); toast('Ajustes guardados');
   },
   saveslots() {
-    let changed = false;
-    S.slots.forEach((s, i) => { const v = ($('#slot-' + i).value || '').trim(); if (v && v !== s.name) { s.name = v; changed = true; } });
-    save(); render(); toast(changed ? 'Nombres guardados' : 'Sin cambios');
+    const parts = id => { const v = [...new Set(($(id).value || '').split(',').map(x => cap(x.trim())).filter(Boolean))]; return v.length ? v : null; };
+    S.slots.forEach((s, i) => {
+      const v = ($('#slot-' + i).value || '').trim(); if (v) s.name = v;
+      const p = parts('#parts-' + i); if (p) s.parts = p;
+    });
+    const pe = parts('#parts-extra'); if (pe) S.extra.parts = pe;
+    save(); render(); toast('Comidas guardadas');
   },
   addslot() {
     const v = $('#newslot').value.trim(); if (!v) { $('#newslot').focus(); return; }
     if (S.slots.some(s => s.name.toLowerCase() === v.toLowerCase())) { toast('Ya existe'); return; }
-    S.slots.push({ id: 's' + uid(), name: v }); save(); render(); toast('Comida añadida', 'Tu meta ahora es ' + S.slots.length);
+    S.slots.push({ id: 's' + uid(), name: v, parts: ['Plato', 'Bebida'] }); save(); render(); toast('Comida añadida', 'Tu meta ahora es ' + S.slots.length);
   },
   delslot(el) {
     if (S.slots.length <= 1) { toast('Deja al menos una'); return; }
@@ -666,7 +864,6 @@ const actions = {
     S.slots.splice(+el.dataset.i, 1); save(); render();
   },
   export() { download(`paso-copia-${todayISO()}.json`, JSON.stringify(S, null, 1), 'application/json'); },
-  csv: exportCSV,
   import() { $('#importFile').click(); },
   reset() {
     if (!confirm('¿Borrar TODOS tus datos? Exporta una copia antes si la quieres guardar.')) return;
@@ -684,7 +881,11 @@ document.addEventListener('click', e => {
 document.addEventListener('keydown', e => {
   if (e.key !== 'Enter' || !sheetCtx || e.target.tagName !== 'INPUT') return;
   e.preventDefault();
-  if (sheetCtx.kind === 'meal') actions.savemeal(); else if (sheetCtx.kind === 'steps') actions.savesteps();
+  if (sheetCtx.kind === 'meal') {
+    // En comidas, "siguiente" pasa a la siguiente parte; en la última, guarda
+    const ins = [...document.querySelectorAll('#sheetBody .irow input')], i = ins.indexOf(e.target);
+    if (i >= 0 && i < ins.length - 1) ins[i + 1].focus(); else actions.savemeal();
+  } else if (sheetCtx.kind === 'steps') actions.savesteps();
 });
 document.addEventListener('input', e => {
   if (e.target.id === 'st-n') { const n = readSteps(); e.target.value = n >= 0 ? fmtN(n) : ''; }
@@ -693,7 +894,7 @@ $('#scrim').addEventListener('click', closeSheet);
 $('#fab').addEventListener('click', () => {
   const d = tab === 'comidas' ? mealDay : todayISO();
   if (tab === 'actividad') stepsForm(todayISO(), true);
-  else mealForm({ id: uid(), date: d, slot: suggestSlot(d), time: d === todayISO() ? nowHM() : '', text: '' }, true);
+  else mealForm({ id: uid(), date: d, slot: suggestSlot(d), time: d === todayISO() ? nowHM() : '', items: [] }, true);
 });
 $('#importFile').addEventListener('change', async e => {
   const f = e.target.files[0]; e.target.value = ''; if (!f) return;
