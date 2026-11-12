@@ -62,7 +62,7 @@ h1 b{font-weight:750}
 .bars .b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px;min-width:0}
 .bars .b i{display:block;width:100%;max-width:30px;border-radius:7px;background:var(--bar);min-height:4px}
 .bars .b.now i{background:#fff}
-.bars .b.empty i{background:#363636}
+.bars .b.zero i{background:#363636}
 .bars .b em{font-style:normal;font-size:10px;color:#8d8d8d;height:12px;line-height:12px}
 .bars .b.now em{color:#fff;font-weight:600}
 .bars.thin{gap:2px}.bars.thin .b i{border-radius:3px}
@@ -70,7 +70,7 @@ h1 b{font-weight:750}
 .goal-line span{position:absolute;right:0;top:-16px;font-size:10px;color:#9a9a9a}
 /* barras en tarjeta clara */
 .light .bars .b i{background:#cfcdc9}.light .bars .b.ok i{background:var(--ink)}.light .bars .b.now i{outline:2px solid var(--ink);outline-offset:1px}
-.light .bars .b.empty i{background:var(--h0)}.light .bars .b em{color:var(--muted)}.light .bars .b.now em{color:var(--ink)}
+.light .bars .b.zero i{background:var(--h0)}.light .bars .b em{color:var(--muted)}.light .bars .b.now em{color:var(--ink)}
 .light .goal-line{border-color:rgba(0,0,0,.25)}.light .goal-line span{color:var(--muted)}
 /* comidas */
 .meal{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line);width:100%;text-align:left}
@@ -208,6 +208,13 @@ ol.steps li{margin-bottom:4px}
 .slotbox{padding:10px 0 12px;border-bottom:1px solid var(--line);margin-bottom:10px}
 .slotbox .slotrow{margin-bottom:6px}
 .inp.parts{height:40px;font-size:14px;color:var(--muted)}
+.remind{display:flex;gap:12px;align-items:flex-start;border:1.5px solid var(--ink)}
+.remind .ric{width:36px;height:36px;border-radius:50%;background:var(--pink);color:#fff;display:grid;place-items:center;flex:none}
+.remind .ric svg{width:18px;height:18px}
+.remind .rt{flex:1;min-width:0}
+.remind .rt b{display:block;font-size:15px}
+.remind .rt span{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+.rbtns{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
 .hide{display:none!important}
 @media (min-width:760px){
   .wrap{max-width:980px}
@@ -289,7 +296,7 @@ const $ = s => document.querySelector(s);
 function defaults() {
   return {
     version: 1, createdAt: Date.now(),
-    settings: { name: '', stepGoal: 10000, strideCm: 73, waterGoal: 8, glassMl: 250 },
+    settings: { name: '', stepGoal: 10000, strideCm: 73, waterGoal: 8, glassMl: 250, stepReminder: '22:30' },
     slots: JSON.parse(JSON.stringify(DEFAULT_SLOTS)),
     extra: JSON.parse(JSON.stringify(DEFAULT_EXTRA)),
     steps: {},   // 'AAAA-MM-DD': pasos totales del día
@@ -304,6 +311,8 @@ function load() {
   S.steps = S.steps || {}; S.water = S.water || {};
   S.slots = S.slots && S.slots.length ? S.slots : defaults().slots;
   S.settings.waterGoal = S.settings.waterGoal || 8; S.settings.glassMl = S.settings.glassMl || 250;
+  if (S.settings.stepReminder == null) S.settings.stepReminder = '22:30';
+  S.stepsAt = S.stepsAt || {}; S.dismissed = S.dismissed || {};
   S.slots.forEach(sl => { if (!Array.isArray(sl.parts) || !sl.parts.length) { const d = DEFAULT_SLOTS.find(x => x.id === sl.id); sl.parts = d ? d.parts.slice() : ['Plato', 'Bebida']; } });
   if (!S.extra || !Array.isArray(S.extra.parts)) S.extra = JSON.parse(JSON.stringify(DEFAULT_EXTRA));
   // Migración de la v1: una sola descripción por comida → partes con cantidad
@@ -370,7 +379,7 @@ function bars(days, label, opts = {}) {
     <div class="goal-line" style="top:${(gl * inner / 100).toFixed(1)}px"><span>${fmtN(goal())}</span></div>
     ${days.map(d => {
       const v = stepsOn(d), fut = d > t;
-      const cls = [d === t ? 'now' : '', !v ? 'empty' : '', v >= goal() ? 'ok' : ''].join(' ');
+      const cls = [d === t ? 'now' : '', !v ? 'zero' : '', v >= goal() ? 'ok' : ''].join(' ');
       return `<div class="b ${cls}" ${opts.tap ? `data-act="day" data-d="${d}"` : ''}><i style="height:${fut ? 0 : Math.max(3, v / max * inner).toFixed(1)}px;${fut ? 'background:transparent' : ''}"></i><em>${label(d)}</em></div>`;
     }).join('')}</div>`;
 }
@@ -454,6 +463,7 @@ function viewHoy() {
   const m = monthOf(now);
   return `
   <header class="top"><div class="hello"><small>Mira cómo va tu día</small><h1>¡Hola${name ? `, <b>${esc(name)}</b>` : ''}!</h1></div>${gear}</header>
+  ${reminderBanner()}
   <div class="pills">${['hoy','semana','mes'].map(p => `<button class="pill ${period === p ? 'on' : ''}" data-act="period" data-p="${p}">${p[0].toUpperCase() + p.slice(1)}</button>`).join('')}</div>
   <div class="toprow">
     <div class="card soft hero" data-act="steps" data-d="${t}">${hero}</div>
@@ -468,6 +478,24 @@ function viewHoy() {
       <div><div class="lbl">${wg} vasos</div><div class="v">${waterOk} <small>de ${past.length} días</small></div>${wkBar(d => waterOn(d) >= wg ? 'ok' : waterOn(d) ? 'part' : '')}</div>
     </div></div>
   <div class="card"><h2>Historial · ${MONTHS_L[now.getMonth()]} ${legend}</h2><div class="heat">${heatCells(m.start, m.end)}</div></div>`;
+}
+
+// Recordatorio dentro de la app: pasos de ayer sin registrar, o pasos de hoy después de la hora elegida
+function reminderBanner() {
+  const t = todayISO(), y = iso(addDays(new Date(), -1)), rem = S.settings.stepReminder, dis = S.dismissed;
+  const bell = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>';
+  const box = (title, sub, btn, k, d) => `<div class="card remind"><div class="ric">${bell}</div><div class="rt"><b>${title}</b><span>${sub}</span>
+    <div class="rbtns">${btn}<button class="btn sm" data-act="dismiss" data-k="${k}" data-d="${d}">Ahora no</button></div></div></div>`;
+  // Ayer sin pasos (solo si ya usabas la app ayer)
+  if (S.steps[y] == null && dis.y !== y && S.createdAt < parse(t).getTime())
+    return box('Ayer no registraste tus pasos', 'Míralos en la app Salud (Pasos → ayer) y escríbelos aquí.', `<button class="btn sm ink" data-act="steps" data-d="${y}">Registrar ayer</button>`, 'y', y);
+  // Hoy: después de la hora del recordatorio, si no los guardaste desde entonces
+  const savedAt = S.stepsAt[t];
+  if (rem && nowHM() >= rem && !(savedAt && savedAt >= rem) && dis.t !== t) {
+    const sub = S.steps[t] != null ? `Tienes ${fmtN(S.steps[t])} guardados${savedAt ? ' desde las ' + savedAt : ''}. Pega el total de ahora.` : 'Si ya llegó el aviso de “Mis pasos”, solo pega.';
+    return box('Hora de registrar tus pasos', sub, `<button class="btn sm ink" data-act="pastesteps">📋 Pegar pasos</button>`, 't', t);
+  }
+  return '';
 }
 
 function viewActividad() {
@@ -585,6 +613,7 @@ function viewAjustes() {
     <div class="setrow"><label for="s-stride">Largo de tu paso (cm)<div class="hint" style="margin:2px 0 0">Para calcular los km. Unos 73 cm es lo normal.</div></label><input class="inp" id="s-stride" inputmode="numeric" value="${st.strideCm}"></div>
     <div class="setrow"><label for="s-water">Meta de agua (vasos al día)</label><input class="inp" id="s-water" inputmode="numeric" value="${st.waterGoal}"></div>
     <div class="setrow"><label for="s-glass">Tamaño del vaso (ml)</label><input class="inp" id="s-glass" inputmode="numeric" value="${st.glassMl}"></div>
+    <div class="setrow"><label for="s-rem">Recordatorio de pasos<div class="hint" style="margin:2px 0 0">Desde esta hora, Hoy te avisa si faltan tus pasos. Déjalo vacío para quitarlo.</div></label><input class="inp" id="s-rem" type="time" value="${esc(st.stepReminder || '')}"></div>
     <div class="cta"><button class="btn ink" data-act="savesettings">Guardar</button></div></div>
   <div class="card"><h2>Comidas del día <span>meta: ${S.slots.length}</span></h2>
     ${S.slots.map((s, i) => `<div class="slotbox"><div class="slotrow"><input class="inp" id="slot-${i}" value="${esc(s.name)}" style="font-weight:600"><button data-act="delslot" data-i="${i}" aria-label="Quitar">✕</button></div>
@@ -599,7 +628,9 @@ function viewAjustes() {
     <ol class="steps"><li>Nuevo atajo → <b>Buscar muestras de salud</b>: tipo <i>Pasos</i>, fecha de inicio <i>es hoy</i>.</li>
       <li>Añade <b>Calcular estadísticas</b>: <i>Suma</i> de las muestras.</li>
       <li>Añade <b>Redondear número</b> y luego <b>Copiar al portapapeles</b>.</li>
-      <li>Llámalo “Mis pasos”. Úsalo, abre Paso, toca <b>+ → Pasos → Pegar</b>.</li></ol>
+      <li>Al final añade <b>Mostrar notificación</b>: <i>Copiados [Número redondeado] pasos</i>.</li>
+      <li>Llámalo “Mis pasos”. En <b>Automatización</b> → Hora del día (la misma de abajo) → <b>Ejecutar inmediatamente</b> → Mis pasos.</li>
+      <li>Cuando llegue el aviso, abre Paso y toca <b>📋 Pegar pasos</b> (o + → Pasos → Pegar).</li></ol>
     <div class="hint">También puedes escribir el número a mano mirando Salud.</div></div>
   <div class="card"><h2>Copia de seguridad</h2>
     <div class="hint" style="margin-top:0">Tus datos se guardan solo en este iPhone. Exporta una copia de vez en cuando (por ejemplo a iCloud Drive).</div>
@@ -794,6 +825,14 @@ const actions = {
     drawMealForm();
   },
   topslot(el) { topSlot = el.dataset.id; render(); },
+  dismiss(el) { S.dismissed[el.dataset.k] = el.dataset.d; save(); render(); },
+  async pastesteps() {
+    let n = NaN;
+    try { n = parseInt(String(await navigator.clipboard.readText()).replace(/[^\d]/g, ''), 10); } catch (e) {}
+    stepsForm(todayISO(), false);
+    if (n >= 0 && n <= 200000) { $('#st-n').value = fmtN(n); toast('Pasos pegados', 'Revisa el número y toca Guardar'); }
+    else toast('No hay pasos copiados', 'Ejecuta tu atajo “Mis pasos” y vuelve');
+  },
   toprange(el) { topRange = el.dataset.v; render(); },
   water(el) { setWater(el.dataset.d, waterOn(el.dataset.d) + +el.dataset.v); },
   cup(el) { const i = +el.dataset.i, n = waterOn(el.dataset.d); setWater(el.dataset.d, i === n - 1 ? i : i + 1); },
@@ -828,14 +867,16 @@ const actions = {
     const n = readSteps(), d = $('#st-date').value || sheetCtx.date;
     if (!(n >= 0) || n > 200000) { toast('Revisa el número'); return; }
     const before = stepsOn(d);
-    S.steps[d] = n; save(); closeSheet(); render();
+    S.steps[d] = n; if (d === todayISO()) S.stepsAt = { [d]: nowHM() };
+    save(); closeSheet(); render();
     const hit = n >= goal() && before < goal();
     toast(hit ? '¡Objetivo de pasos cumplido! 🎉' : 'Pasos guardados', d === todayISO() ? (hit ? `${fmtN(n)} pasos · ${km(n)}` : leftMsg()) : `${fmtN(n)} pasos · ${dLong(d)}`);
   },
   delsteps() { delete S.steps[sheetCtx.date]; save(); closeSheet(); render(); toast('Pasos borrados'); },
   savesettings() {
     const g = parseInt($('#s-goal').value.replace(/\D/g, ''), 10), s = parseInt($('#s-stride').value, 10);
-    const w = parseInt($('#s-water').value, 10), ml = parseInt($('#s-glass').value, 10);
+    const w = parseInt($('#s-water').value, 10), ml = parseInt($('#s-glass').value, 10), rem = $('#s-rem').value;
+    if (rem === '' || /^\d\d:\d\d$/.test(rem)) S.settings.stepReminder = rem;
     if (w >= 1 && w <= 30) S.settings.waterGoal = w;
     if (ml >= 50 && ml <= 1000) S.settings.glassMl = ml;
     S.settings.name = $('#s-name').value.trim();
